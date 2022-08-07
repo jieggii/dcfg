@@ -1,2 +1,1 @@
-# dcfg
 dcfg - distribute config.
