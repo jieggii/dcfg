@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/user"
 	"strconv"
 	"strings"
 )
@@ -16,6 +17,35 @@ type Config struct {
 type ParserError struct {
 	LineNumber int
 	Message    string
+}
+
+func unifyPath(path string, indicateDir bool) string {
+	if strings.Contains(path, "~") { // expand user home dir (~)
+		currentUser, err := user.Current()
+		if err != nil {
+			panic(err) // todo
+		}
+		path = strings.ReplaceAll(path, "~", currentUser.HomeDir)
+	}
+	if !strings.HasPrefix(path, "/") && !strings.HasPrefix(path, "./") {
+		// this is just for pleasant look...
+		// dir -> ./dir2
+		path = "./" + path
+	}
+	if indicateDir {
+		if !strings.HasSuffix(path, "/") {
+			path = path + "/" // /dir -> /dir/
+		}
+	}
+	return path
+}
+
+func unifyBindingPaths(path1 string, path2 string) (string, string) {
+	if strings.HasSuffix(path1, "/") || strings.HasSuffix(path2, "/") {
+		return unifyPath(path1, true), unifyPath(path2, true)
+	} else {
+		return unifyPath(path1, false), unifyPath(path2, false)
+	}
 }
 
 func CreateConfig(path string) error {
@@ -72,8 +102,7 @@ func parseConfig(content string) (*Config, []ParserError) {
 					)
 					break
 				}
-				path1 := tokens[1]
-				path2 := tokens[2]
+				path1, path2 := unifyBindingPaths(tokens[1], tokens[2])
 				config.Bindings[path1] = path2
 			case "add": // bind [path]
 				if argsCount != 1 {
@@ -85,7 +114,7 @@ func parseConfig(content string) (*Config, []ParserError) {
 						})
 					break
 				}
-				path1 := tokens[1]
+				path1 := unifyPath(tokens[1], false)
 				config.Additions = append(config.Additions, path1)
 			default:
 				parserErrors = append(

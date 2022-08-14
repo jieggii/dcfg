@@ -5,6 +5,7 @@ import (
 	"github.com/jieggii/dcfg/cmd/config"
 	"github.com/urfave/cli/v2"
 	"os"
+	"strings"
 )
 
 func usageErrorHandler(context *cli.Context, err error, isSubCommand bool) error {
@@ -85,14 +86,38 @@ func main() {
 					if err != nil {
 						fmt.Printf("Could not read dcfg config file `%v`: %v.\n", cfgFilename, err)
 					}
-					fmt.Println(cfg)
 					if len(cfg.Additions) == 0 {
 						fmt.Printf("Nothing to do (there are no `add` directives in `%v`).\n", cfgFilename)
 						return nil
 					}
+					//fmt.Println("bind", cfg.Bindings)
+					//fmt.Println("add", cfg.Additions)
+					fmt.Println("Bindings:")
+					for key, value := range cfg.Bindings {
+						fmt.Printf("%v -> %v\n", key, value)
+					}
+					fmt.Println("")
+					fmt.Println("Additions:")
 					for _, addition := range cfg.Additions {
 						fmt.Println(addition)
 					}
+					fmt.Println("")
+					fmt.Println("Copy:")
+					for _, addition := range cfg.Additions {
+						matched := false
+						for key, value := range cfg.Bindings {
+							if strings.HasPrefix(addition, key) {
+								newAddition := strings.Replace(addition, key, value, 1)
+								fmt.Printf("%v -> %v\n", addition, newAddition)
+								matched = true
+								break
+							}
+						}
+						if !matched {
+							fmt.Printf("Unmatched addition: %v\n", addition)
+						}
+					}
+
 					return nil
 				},
 				OnUsageError: usageErrorHandler,
