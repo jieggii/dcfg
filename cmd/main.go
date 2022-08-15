@@ -5,6 +5,7 @@ import (
 	"github.com/jieggii/dcfg/cmd/config"
 	"github.com/urfave/cli/v2"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -35,7 +36,7 @@ func main() {
 	app := &cli.App{
 		Name:        "dcfg",
 		Usage:       "distribute config",
-		UsageText:   "dcfg [flags] [command] [command flags]",
+		UsageText:   "dcfg [global options] [command] [command options]",
 		Version:     "0.1.0",
 		Description: "Description...",
 		Authors: []*cli.Author{
@@ -44,15 +45,22 @@ func main() {
 				Email: "jieggii@pm.me",
 			},
 		},
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "config",
+				Usage:   "dcfg config file `NAME`",
+				Value:   "dcfg.conf",
+				Aliases: []string{"c"},
+			},
+		},
 		Commands: []*cli.Command{
 			{
-				Name:        "init",
-				Aliases:     []string{"i"},
-				Usage:       "create dcfg config file in the current working dir",
-				UsageText:   "dcfg init",
-				Description: "Creates dcfg.conf file in the current directory.",
+				Name:      "init",
+				Aliases:   []string{"i"},
+				Usage:     "create dcfg config file in the current working directory",
+				UsageText: "dcfg init",
 				Action: func(context *cli.Context) error {
-					cfgFilename := "dcfg.conf"
+					cfgFilename := context.String("config")
 					if context.Args().Len() != 0 {
 						logCommandUsageError(context, "too many arguments")
 						os.Exit(1)
@@ -67,11 +75,10 @@ func main() {
 				OnUsageError: usageErrorHandler,
 			},
 			{
-				Name:        "update",
-				Aliases:     []string{"u"},
-				Usage:       "update current working dir according to the dcfg config file",
-				UsageText:   "dcfg update",
-				Description: "Updates current working directory according to the dcfg config file.",
+				Name:      "update",
+				Aliases:   []string{"u"},
+				Usage:     "update current working directory according to the dcfg config file",
+				UsageText: "dcfg update",
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:    "remove",
@@ -81,23 +88,30 @@ func main() {
 					},
 				},
 				Action: func(context *cli.Context) error {
-					cfgFilename := "dcfg.conf"
+					cfgFilename := context.String("config")
 					cfg, err := config.ReadConfig(cfgFilename)
 					if err != nil {
 						fmt.Printf("Error: could not read dcfg config file `%v`: %v.\n", cfgFilename, err)
 						os.Exit(2)
 					}
-					if len(cfg.Additions) == 0 {
+					if len(cfg.Additions.Paths) == 0 {
 						fmt.Printf("Error: nothing to do (there are no `add` directives in `%v`).\n", cfgFilename)
 						return nil
 					}
-					for _, globalPath := range cfg.Additions {
+					fmt.Println("Updating working directory according to the bindings:")
+					for i, source := range cfg.Bindings.Sources {
+						destination := cfg.Bindings.Destinations[i]
+						fmt.Printf("%v. %-"+strconv.Itoa(cfg.Bindings.LongesetSourceLength)+"v : %v\n", i+1, source, destination)
+					}
+					fmt.Println("")
+					for _, globalPath := range cfg.Additions.Paths {
 						matched := false
 						for i, source := range cfg.Bindings.Sources {
 							destination := cfg.Bindings.Destinations[i]
 							if strings.HasPrefix(globalPath, source) {
 								localPath := strings.Replace(globalPath, source, destination, 1)
-								fmt.Printf("%v -> %v\n", globalPath, localPath)
+								fmt.Printf("%-"+strconv.Itoa(cfg.Additions.LongestPathLenght)+"v -> %v\n", globalPath, localPath)
+
 								matched = true
 								break
 							}
@@ -110,6 +124,16 @@ func main() {
 						}
 					}
 
+					return nil
+				},
+				OnUsageError: usageErrorHandler,
+			},
+			{
+				Name:      "push",
+				Aliases:   []string{"p"},
+				Usage:     "add, commit and push changes to a remote git repository",
+				UsageText: "dcfg push",
+				Action: func(context *cli.Context) error {
 					return nil
 				},
 				OnUsageError: usageErrorHandler,

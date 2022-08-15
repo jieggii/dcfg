@@ -13,18 +13,36 @@ type Bindings struct {
 	// using own implementation of map because golang map behaves strangerly:
 	// sometimes it messess up order of the keys, what leads to incorrect behaviour
 	// of crossing bindings
-	Sources      []string
-	Destinations []string
+	LongesetSourceLength int // this is needed for pretty-printing
+	Sources              []string
+	Destinations         []string
 }
 
 func (bindings *Bindings) AddBinding(source string, destination string) {
+	sourceLen := len(source)
+	if sourceLen > bindings.LongesetSourceLength {
+		bindings.LongesetSourceLength = sourceLen
+	}
 	bindings.Sources = append(bindings.Sources, source)
 	bindings.Destinations = append(bindings.Destinations, destination)
 }
 
+type Additions struct {
+	LongestPathLenght int
+	Paths             []string
+}
+
+func (additions *Additions) AddAddition(path string) {
+	pathLen := len(path)
+	if pathLen > additions.LongestPathLenght {
+		additions.LongestPathLenght = pathLen
+	}
+	additions.Paths = append(additions.Paths, path)
+}
+
 type Config struct {
 	Bindings  Bindings
-	Additions []string
+	Additions Additions
 }
 
 type ParserError struct {
@@ -88,6 +106,8 @@ bind / ./root/   # directories and files from / will be copied to ./root/
 func parseConfig(content string) (*Config, []ParserError) {
 	var parserErrors []ParserError
 	var config Config
+	config.Bindings.LongesetSourceLength = 0
+	config.Additions.LongestPathLenght = 0
 
 	lines := strings.Split(content, "\n")
 	for i, line := range lines {
@@ -125,8 +145,8 @@ func parseConfig(content string) (*Config, []ParserError) {
 						})
 					break
 				}
-				path1 := unifyPath(tokens[1], false)
-				config.Additions = append(config.Additions, path1)
+				path := unifyPath(tokens[1], false)
+				config.Additions.AddAddition(path)
 			default:
 				parserErrors = append(
 					parserErrors,
