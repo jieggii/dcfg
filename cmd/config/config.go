@@ -9,8 +9,21 @@ import (
 	"strings"
 )
 
+type Bindings struct {
+	// using own implementation of map because golang map behaves strangerly:
+	// sometimes it messess up order of the keys, what leads to incorrect behaviour
+	// of crossing bindings
+	Sources      []string
+	Destinations []string
+}
+
+func (bindings *Bindings) AddBinding(source string, destination string) {
+	bindings.Sources = append(bindings.Sources, source)
+	bindings.Destinations = append(bindings.Destinations, destination)
+}
+
 type Config struct {
-	Bindings  map[string]string
+	Bindings  Bindings
 	Additions []string
 }
 
@@ -52,31 +65,29 @@ func CreateConfig(path string) error {
 	content := `# This is an example dcfg config file.
 # More information about dcfg config files can be found here: https://github.com/jieggii/dcfg.
 
-# "bind" directive - bind absolute path to local one.
+# "bind" directive - bind absolute path to relative one.
 # Syntax: bind [absolute path] [relative path]
-bind ~ ./home/  # directories and files from $HOME will be copied to ./home/
-bind / ./root/  # directories and files from / will be copied to ./root/
+bind ~/ ./home/  # directories and files from $HOME will be copied to ./home/
+bind / ./root/   # directories and files from / will be copied to ./root/
 
 # "add" directive - copy directories and files to the current directory respecting bindings.
 # Syntax: add [absolute path]
-# add ~/.config/i3     # will be copied to ./home/.config/i3
-# add ~/.config/picom  # will be copied to ./home/.config/picom
-# add ~/.Xresources    # will be copied to ./home/.Xresources
+# add ~/.config/i3   # ~/.config/i3    will be copied to ./home/.config/i3
+# add ~/.Xresources  # ~/.Xresourecs   will be copied to ./home/.Xresources
+# add /etc/hostname  # /etc/hostname   will be copied to ./root/etc/hostname			   
 `
 	if _, err := os.Stat(path); err == nil {
 		return errors.New("file already exists")
 	} else if errors.Is(err, os.ErrNotExist) {
-		return os.WriteFile(path, []byte(content), 0755)
+		return os.WriteFile(path, []byte(content), 0666) // todo: set proper perm
 	} else {
 		return err
 	}
 }
 
 func parseConfig(content string) (*Config, []ParserError) {
-	var config Config
-	config.Bindings = make(map[string]string) // init bindings map
-
 	var parserErrors []ParserError
+	var config Config
 
 	lines := strings.Split(content, "\n")
 	for i, line := range lines {
@@ -87,11 +98,11 @@ func parseConfig(content string) (*Config, []ParserError) {
 			valuable = strings.Trim(valuable, " ")  // removing extra spaces if they are present
 
 			tokens := strings.Split(valuable, " ") // tokens of the valuable line
-			directive := tokens[0]                 // first token - directive
+			directive := tokens[0]                 // first token = directive
 			argsCount := len(tokens) - 1
 
 			switch directive {
-			case "bind": // bind [path1] [path2]
+			case "bind": // bind [source] [dest]
 				if argsCount != 2 {
 					parserErrors = append(
 						parserErrors,
@@ -102,8 +113,8 @@ func parseConfig(content string) (*Config, []ParserError) {
 					)
 					break
 				}
-				path1, path2 := unifyBindingPaths(tokens[1], tokens[2])
-				config.Bindings[path1] = path2
+				source, destination := unifyBindingPaths(tokens[1], tokens[2])
+				config.Bindings.AddBinding(source, destination)
 			case "add": // bind [path]
 				if argsCount != 1 {
 					parserErrors = append(
@@ -137,11 +148,11 @@ func ReadConfig(path string) (*Config, error) {
 	}
 	config, parserErrors := parseConfig(string(bytes))
 	if len(parserErrors) != 0 {
-		fmt.Println("Error: got some errors while parsing dcfg config file:")
+		fmt.Println("Error: there are some errors in the dcfg config file:")
 		for _, parserError := range parserErrors {
 			fmt.Printf("%v line %v: %v.\n", path, parserError.LineNumber, parserError.Message)
 		}
-		os.Exit(2)
+		os.Exit(3)
 	}
 	return config, nil
 }

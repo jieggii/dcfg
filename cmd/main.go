@@ -59,7 +59,7 @@ func main() {
 					}
 					if err := config.CreateConfig(cfgFilename); err != nil {
 						fmt.Printf("Error: could not create dcfg config file `%v`: %v.\n", cfgFilename, err)
-						os.Exit(1)
+						os.Exit(2)
 					}
 					fmt.Printf("Created dcfg config file `%v` in the current working directory.\n", cfgFilename)
 					return nil
@@ -84,37 +84,29 @@ func main() {
 					cfgFilename := "dcfg.conf"
 					cfg, err := config.ReadConfig(cfgFilename)
 					if err != nil {
-						fmt.Printf("Could not read dcfg config file `%v`: %v.\n", cfgFilename, err)
+						fmt.Printf("Error: could not read dcfg config file `%v`: %v.\n", cfgFilename, err)
+						os.Exit(2)
 					}
 					if len(cfg.Additions) == 0 {
-						fmt.Printf("Nothing to do (there are no `add` directives in `%v`).\n", cfgFilename)
+						fmt.Printf("Error: nothing to do (there are no `add` directives in `%v`).\n", cfgFilename)
 						return nil
 					}
-					//fmt.Println("bind", cfg.Bindings)
-					//fmt.Println("add", cfg.Additions)
-					fmt.Println("Bindings:")
-					for key, value := range cfg.Bindings {
-						fmt.Printf("%v -> %v\n", key, value)
-					}
-					fmt.Println("")
-					fmt.Println("Additions:")
-					for _, addition := range cfg.Additions {
-						fmt.Println(addition)
-					}
-					fmt.Println("")
-					fmt.Println("Copy:")
-					for _, addition := range cfg.Additions {
+					for _, globalPath := range cfg.Additions {
 						matched := false
-						for key, value := range cfg.Bindings {
-							if strings.HasPrefix(addition, key) {
-								newAddition := strings.Replace(addition, key, value, 1)
-								fmt.Printf("%v -> %v\n", addition, newAddition)
+						for i, source := range cfg.Bindings.Sources {
+							destination := cfg.Bindings.Destinations[i]
+							if strings.HasPrefix(globalPath, source) {
+								localPath := strings.Replace(globalPath, source, destination, 1)
+								fmt.Printf("%v -> %v\n", globalPath, localPath)
 								matched = true
 								break
 							}
 						}
 						if !matched {
-							fmt.Printf("Unmatched addition: %v\n", addition)
+							fmt.Printf(
+								"Warning: ingoring unmatched addition: %v\n",
+								globalPath,
+							)
 						}
 					}
 
