@@ -1,1 +1,0 @@
-dcfg - distribute config.

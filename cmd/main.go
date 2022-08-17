@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/jieggii/dcfg/cmd/config"
+	cp "github.com/otiai10/copy"
 	"github.com/urfave/cli/v2"
 	"os"
 	"strconv"
@@ -38,7 +39,7 @@ func main() {
 		Usage:       "distribute config",
 		UsageText:   "dcfg [global options] [command] [command options]",
 		Version:     "0.1.0",
-		Description: "Description...",
+		Description: "Simple tool for copying and distributing your config files.",
 		Authors: []*cli.Author{
 			{
 				Name:  "jieggii",
@@ -48,7 +49,7 @@ func main() {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "config",
-				Usage:   "dcfg config file `NAME`",
+				Usage:   "dcfg config file `PATH`",
 				Value:   "dcfg.conf",
 				Aliases: []string{"c"},
 			},
@@ -60,16 +61,16 @@ func main() {
 				Usage:     "create dcfg config file in the current working directory",
 				UsageText: "dcfg init",
 				Action: func(context *cli.Context) error {
-					cfgFilename := context.String("config")
+					cfgPath := context.String("config")
 					if context.Args().Len() != 0 {
 						logCommandUsageError(context, "too many arguments")
 						os.Exit(1)
 					}
-					if err := config.CreateConfig(cfgFilename); err != nil {
-						fmt.Printf("Error: could not create dcfg config file `%v`: %v.\n", cfgFilename, err)
+					if err := config.CreateConfig(cfgPath); err != nil {
+						fmt.Printf("Error: could not create dcfg config file `%v`: %v.\n", cfgPath, err)
 						os.Exit(2)
 					}
-					fmt.Printf("Created dcfg config file `%v` in the current working directory.\n", cfgFilename)
+					fmt.Printf("Created dcfg config file `%v` in the current working directory.\n", cfgPath)
 					return nil
 				},
 				OnUsageError: usageErrorHandler,
@@ -88,20 +89,16 @@ func main() {
 					},
 				},
 				Action: func(context *cli.Context) error {
-					cfgFilename := context.String("config")
-					cfg, err := config.ReadConfig(cfgFilename)
-					if err != nil {
-						fmt.Printf("Error: could not read dcfg config file `%v`: %v.\n", cfgFilename, err)
-						os.Exit(2)
-					}
+					cfgPath := context.String("config")
+					cfg := config.ReadConfig(cfgPath)
 					if len(cfg.Additions.Paths) == 0 {
-						fmt.Printf("Error: nothing to do (there are no `add` directives in `%v`).\n", cfgFilename)
+						fmt.Printf("Error: nothing to do (there are no `add` directives in `%v`).\n", cfgPath)
 						return nil
 					}
-					fmt.Println("Updating working directory according to the bindings:")
+					fmt.Println("Updating working directory according to these bindings:")
 					for i, source := range cfg.Bindings.Sources {
 						destination := cfg.Bindings.Destinations[i]
-						fmt.Printf("%v. %-"+strconv.Itoa(cfg.Bindings.LongesetSourceLength)+"v : %v\n", i+1, source, destination)
+						fmt.Printf("%v. %-"+strconv.Itoa(cfg.Bindings.LongestSourceLength)+"v : %v\n", i+1, source, destination)
 					}
 					fmt.Println("")
 					for _, globalPath := range cfg.Additions.Paths {
@@ -109,10 +106,13 @@ func main() {
 						for i, source := range cfg.Bindings.Sources {
 							destination := cfg.Bindings.Destinations[i]
 							if strings.HasPrefix(globalPath, source) {
-								localPath := strings.Replace(globalPath, source, destination, 1)
-								fmt.Printf("%-"+strconv.Itoa(cfg.Additions.LongestPathLenght)+"v -> %v\n", globalPath, localPath)
-
 								matched = true
+								localPath := strings.Replace(globalPath, source, destination, 1)
+								if err := cp.Copy(globalPath, localPath); err != nil {
+									fmt.Printf("Error: could not copy %v to %v\n", globalPath, localPath)
+								} else {
+									fmt.Printf("%-"+strconv.Itoa(cfg.Additions.LongestPathLength)+"v -> %v\n", globalPath, localPath)
+								}
 								break
 							}
 						}

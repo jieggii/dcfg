@@ -10,39 +10,56 @@ import (
 )
 
 type Bindings struct {
-	// using own implementation of map because golang map behaves strangerly:
-	// sometimes it messess up order of the keys, what leads to incorrect behaviour
+	// using own implementation of map because golang map behaves strangely:
+	// sometimes it messes up order of the keys, what leads to incorrect behaviour
 	// of crossing bindings
-	LongesetSourceLength int // this is needed for pretty-printing
-	Sources              []string
-	Destinations         []string
+	LongestSourceLength     int // needed for pretty-printing
+	Sources                 []string
+	DestinationPrefix       string // path prefix for all destinations ("./") by default
+	DestinationPrefixWasSet bool   // true if DestinationPrefix was changed from default, othervice false
+	Destinations            []string
 }
 
-func (bindings *Bindings) AddBinding(source string, destination string) {
+func (bindings *Bindings) appendBinding(source string, destination string) {
 	sourceLen := len(source)
-	if sourceLen > bindings.LongesetSourceLength {
-		bindings.LongesetSourceLength = sourceLen
+	if sourceLen > bindings.LongestSourceLength {
+		bindings.LongestSourceLength = sourceLen
 	}
 	bindings.Sources = append(bindings.Sources, source)
 	bindings.Destinations = append(bindings.Destinations, destination)
 }
 
+func newBindings() Bindings {
+	return Bindings{LongestSourceLength: 0, DestinationPrefix: "./"}
+}
+
 type Additions struct {
-	LongestPathLenght int
+	LongestPathLength int // needed for pretty-printing
 	Paths             []string
 }
 
-func (additions *Additions) AddAddition(path string) {
+func newAdditions() Additions {
+	return Additions{LongestPathLength: 0}
+}
+
+func (additions *Additions) appendAddition(path string) {
 	pathLen := len(path)
-	if pathLen > additions.LongestPathLenght {
-		additions.LongestPathLenght = pathLen
+	if pathLen > additions.LongestPathLength {
+		additions.LongestPathLength = pathLen
 	}
 	additions.Paths = append(additions.Paths, path)
 }
 
 type Config struct {
-	Bindings  Bindings
-	Additions Additions
+	Bindings  Bindings  // path bindings (source path prefix to destination local path)
+	Additions Additions // source path
+}
+
+func newConfig() *Config {
+	return &Config{
+		Bindings:  newBindings(),
+		Additions: newAdditions(),
+	}
 }
 
 type ParserError struct {
@@ -82,16 +99,18 @@ func unifyBindingPaths(path1 string, path2 string) (string, string) {
 func CreateConfig(path string) error {
 	content := `# This is an example dcfg config file.
 # More information about dcfg config files can be found here: https://github.com/jieggii/dcfg.
+# "destination" directive - set directory where all config files will be placed 
+destination ./  # default destination
 
-# "bind" directive - bind absolute path to relative one.
-# Syntax: bind [absolute path] [relative path]
+# "bind" directive - bind absolute path to local one.
+# Syntax: bind [absolute path] [local path]
 bind ~/ ./home/  # directories and files from $HOME will be copied to ./home/
 bind / ./root/   # directories and files from / will be copied to ./root/
 
 # "add" directive - copy directories and files to the current directory respecting bindings.
 # Syntax: add [absolute path]
 # add ~/.config/i3   # ~/.config/i3    will be copied to ./home/.config/i3
-# add ~/.Xresources  # ~/.Xresourecs   will be copied to ./home/.Xresources
+# add ~/.Xresources  # ~/.Xresources   will be copied to ./home/.Xresources
 # add /etc/hostname  # /etc/hostname   will be copied to ./root/etc/hostname			   
 `
 	if _, err := os.Stat(path); err == nil {
@@ -105,9 +124,7 @@ bind / ./root/   # directories and files from / will be copied to ./root/
 
 func parseConfig(content string) (*Config, []ParserError) {
 	var parserErrors []ParserError
-	var config Config
-	config.Bindings.LongesetSourceLength = 0
-	config.Additions.LongestPathLenght = 0
+	config := newConfig()
 
 	lines := strings.Split(content, "\n")
 	for i, line := range lines {
@@ -119,60 +136,86 @@ func parseConfig(content string) (*Config, []ParserError) {
 
 			tokens := strings.Split(valuable, " ") // tokens of the valuable line
 			directive := tokens[0]                 // first token = directive
-			argsCount := len(tokens) - 1
+			args := tokens[1:]
+			argsCount := len(args)
 
 			switch directive {
+			case "destination": // destination [path]
+				if argsCount != 1 {
+					parserErrors = append(
+						parserErrors,
+						ParserError{
+							lineNumber,
+							"'destination' directive requires exactly one argument, got " + strconv.Itoa(argsCount),
+						},
+					)
+					break
+				}
+				if config.Bindings.DestinationPrefixWasSet {
+					parserErrors = append(
+						parserErrors,
+						ParserError{
+							lineNumber,
+							"'destination' directive may be used only once",
+						},
+					)
+					break
+				}
+				path := args[0]
+				config.Bindings.DestinationPrefix = path
+				config.Bindings.DestinationPrefixWasSet = true
+
 			case "bind": // bind [source] [dest]
 				if argsCount != 2 {
 					parserErrors = append(
 						parserErrors,
 						ParserError{
 							lineNumber,
-							"`bind` directive requires exactly two arguments, got " + strconv.Itoa(argsCount),
+							"'bind' directive requires exactly two arguments, got " + strconv.Itoa(argsCount),
 						},
 					)
 					break
 				}
-				source, destination := unifyBindingPaths(tokens[1], tokens[2])
-				config.Bindings.AddBinding(source, destination)
+				source, destination := unifyBindingPaths(args[0], args[1])
+				config.Bindings.appendBinding(source, destination)
 			case "add": // bind [path]
 				if argsCount != 1 {
 					parserErrors = append(
 						parserErrors,
 						ParserError{
 							lineNumber,
-							"`add` directive requires exactly one argument, got " + strconv.Itoa(argsCount),
+							"'add' directive requires exactly one argument, got " + strconv.Itoa(argsCount),
 						})
 					break
 				}
-				path := unifyPath(tokens[1], false)
-				config.Additions.AddAddition(path)
+				path := unifyPath(args[0], false)
+				config.Additions.appendAddition(path)
 			default:
 				parserErrors = append(
 					parserErrors,
 					ParserError{
 						lineNumber,
-						fmt.Sprintf("unknown directive `%v`", directive),
+						fmt.Sprintf("unknown directive '%v'", directive),
 					},
 				)
 			}
 		}
 	}
-	return &config, nil
+	return config, parserErrors
 }
 
-func ReadConfig(path string) (*Config, error) {
+func ReadConfig(path string) *Config {
 	bytes, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		fmt.Printf("Error: could not read dcfg config file %v: %v.\n", path, err)
+		os.Exit(2)
 	}
 	config, parserErrors := parseConfig(string(bytes))
 	if len(parserErrors) != 0 {
-		fmt.Println("Error: there are some errors in the dcfg config file:")
 		for _, parserError := range parserErrors {
-			fmt.Printf("%v line %v: %v.\n", path, parserError.LineNumber, parserError.Message)
+			fmt.Printf("Error parsing %v (line %v): %v.\n", path, parserError.LineNumber, parserError.Message)
 		}
 		os.Exit(3)
 	}
-	return config, nil
+	return config
 }
