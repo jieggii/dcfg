@@ -3,115 +3,40 @@ package config
 import (
 	"errors"
 	"fmt"
+	"github.com/jieggii/dcfg/cmd/log"
+	"github.com/jieggii/dcfg/cmd/util"
 	"os"
-	"os/user"
+	p "path"
 	"strconv"
 	"strings"
 )
-
-type Bindings struct {
-	// using own implementation of map because golang map behaves strangely:
-	// sometimes it messes up order of the keys, what leads to incorrect behaviour
-	// of crossing bindings
-	LongestSourceLength     int // needed for pretty-printing
-	Sources                 []string
-	DestinationPrefix       string // path prefix for all destinations ("./") by default
-	DestinationPrefixWasSet bool   // true if DestinationPrefix was changed from default, othervice false
-	Destinations            []string
-}
-
-func (bindings *Bindings) appendBinding(source string, destination string) {
-	sourceLen := len(source)
-	if sourceLen > bindings.LongestSourceLength {
-		bindings.LongestSourceLength = sourceLen
-	}
-	bindings.Sources = append(bindings.Sources, source)
-	bindings.Destinations = append(bindings.Destinations, destination)
-}
-
-func newBindings() Bindings {
-	return Bindings{LongestSourceLength: 0, DestinationPrefix: "./"}
-}
-
-type Additions struct {
-	LongestPathLength int // needed for pretty-printing
-	Paths             []string
-}
-
-func newAdditions() Additions {
-	return Additions{LongestPathLength: 0}
-}
-
-func (additions *Additions) appendAddition(path string) {
-	pathLen := len(path)
-	if pathLen > additions.LongestPathLength {
-		additions.LongestPathLength = pathLen
-	}
-	additions.Paths = append(additions.Paths, path)
-}
-
-type Config struct {
-	Bindings  Bindings  // path bindings (source path prefix to destination local path)
-	Additions Additions // source path
-}
-
-func newConfig() *Config {
-	return &Config{
-		Bindings:  newBindings(),
-		Additions: newAdditions(),
-	}
-}
 
 type ParserError struct {
 	LineNumber int
 	Message    string
 }
 
-func unifyPath(path string, indicateDir bool) string {
-	if strings.Contains(path, "~") { // expand user home dir (~)
-		currentUser, err := user.Current()
-		if err != nil {
-			panic(err) // todo
-		}
-		path = strings.ReplaceAll(path, "~", currentUser.HomeDir)
-	}
-	if !strings.HasPrefix(path, "/") && !strings.HasPrefix(path, "./") {
-		// this is just for pleasant look...
-		// dir -> ./dir2
-		path = "./" + path
-	}
-	if indicateDir {
-		if !strings.HasSuffix(path, "/") {
-			path = path + "/" // /dir -> /dir/
-		}
-	}
-	return path
-}
-
-func unifyBindingPaths(path1 string, path2 string) (string, string) {
-	if strings.HasSuffix(path1, "/") || strings.HasSuffix(path2, "/") {
-		return unifyPath(path1, true), unifyPath(path2, true)
-	} else {
-		return unifyPath(path1, false), unifyPath(path2, false)
-	}
-}
-
 func CreateConfig(path string) error {
 	content := `# This is an example dcfg config file.
 # More information about dcfg config files can be found here: https://github.com/jieggii/dcfg.
-# "destination" directive - set directory where all config files will be placed 
-destination ./  # default destination
 
-# "bind" directive - bind absolute path to local one.
-# Syntax: bind [absolute path] [local path]
-bind ~/ ./home/  # directories and files from $HOME will be copied to ./home/
-bind / ./root/   # directories and files from / will be copied to ./root/
+# 'dest' directive - set directory where all config files will be placed.
+# Syntax: dest [path].
+dest ./  # ./ is default value
 
-# "add" directive - copy directories and files to the current directory respecting bindings.
+# Bindings (order makes sense):
+# 'bind' directive - bind absolute path to a local one.
+# Syntax: bind [absolute path] [local path].
+bind ~ home/  # directories and files from $HOME will be copied to ./home/
+bind / root/  # directories and files from / will be copied to ./root/
+
+# Additions:
+# 'add' directive - copy directories and files to the destination directory respecting bindings.
 # Syntax: add [absolute path]
-# add ~/.config/i3   # ~/.config/i3    will be copied to ./home/.config/i3
-# add ~/.Xresources  # ~/.Xresources   will be copied to ./home/.Xresources
-# add /etc/hostname  # /etc/hostname   will be copied to ./root/etc/hostname			   
+# add ~/.config/i3   # ~/.config/i3  will be copied to ./home/.config/i3
+# add ~/.Xresources  # ~/.Xresources will be copied to ./home/.Xresources
+# add /etc/hostname  # /etc/hostname will be copied to ./root/etc/hostname
+
 `
 	if _, err := os.Stat(path); err == nil {
 		return errors.New("file already exists")
@@ -135,18 +60,19 @@ func parseConfig(content string) (*Config, []ParserError) {
 			valuable = strings.Trim(valuable, " ")  // removing extra spaces if they are present
 
 			tokens := strings.Split(valuable, " ") // tokens of the valuable line
-			directive := tokens[0]                 // first token = directive
-			args := tokens[1:]
+			directive := tokens[0]                 // first token - directive
+
+			args := tokens[1:] // other tokens - arguments
 			argsCount := len(args)
 
 			switch directive {
-			case "destination": // destination [path]
+			case "dest": // dest [path]
 				if argsCount != 1 {
 					parserErrors = append(
 						parserErrors,
 						ParserError{
 							lineNumber,
-							"'destination' directive requires exactly one argument, got " + strconv.Itoa(argsCount),
+							"'dest' directive requires exactly one argument, got " + strconv.Itoa(argsCount),
 						},
 					)
 					break
@@ -161,7 +87,17 @@ func parseConfig(content string) (*Config, []ParserError) {
 					)
 					break
 				}
-				path := args[0]
+				path := util.CompilePath(args[0])
+				if p.IsAbs(path) {
+					parserErrors = append(
+						parserErrors,
+						ParserError{
+							lineNumber,
+							"the only argument of 'destination' directive (path) must be a local path",
+						},
+					)
+					break
+				}
 				config.Bindings.DestinationPrefix = path
 				config.Bindings.DestinationPrefixWasSet = true
 
@@ -176,7 +112,27 @@ func parseConfig(content string) (*Config, []ParserError) {
 					)
 					break
 				}
-				source, destination := unifyBindingPaths(args[0], args[1])
+				source := util.CompilePath(args[0])
+				if !p.IsAbs(source) {
+					parserErrors = append(
+						parserErrors,
+						ParserError{
+							lineNumber,
+							"the first argument of 'bind' directive (source path) must be an absolute path",
+						},
+					)
+					break
+				}
+				destination := args[1]
+				if p.IsAbs(destination) {
+					parserErrors = append(
+						parserErrors,
+						ParserError{
+							lineNumber,
+							"the second argument of 'bind' directive (destination path) must be a local path",
+						},
+					)
+				}
 				config.Bindings.appendBinding(source, destination)
 			case "add": // bind [path]
 				if argsCount != 1 {
@@ -188,7 +144,17 @@ func parseConfig(content string) (*Config, []ParserError) {
 						})
 					break
 				}
-				path := unifyPath(args[0], false)
+				path := util.CompilePath(args[0])
+				if !p.IsAbs(path) {
+					parserErrors = append(
+						parserErrors,
+						ParserError{
+							lineNumber,
+							"the only argument of 'add' directive (path) must be an absolute path",
+						},
+					)
+					break
+				}
 				config.Additions.appendAddition(path)
 			default:
 				parserErrors = append(
@@ -207,13 +173,13 @@ func parseConfig(content string) (*Config, []ParserError) {
 func ReadConfig(path string) *Config {
 	bytes, err := os.ReadFile(path)
 	if err != nil {
-		fmt.Printf("Error: could not read dcfg config file %v: %v.\n", path, err)
+		log.Error("Error: could not read dcfg config file %v: %v.", path, err)
 		os.Exit(2)
 	}
 	config, parserErrors := parseConfig(string(bytes))
 	if len(parserErrors) != 0 {
 		for _, parserError := range parserErrors {
-			fmt.Printf("Error parsing %v (line %v): %v.\n", path, parserError.LineNumber, parserError.Message)
+			log.Error("Error parsing %v (line %v): %v.", path, parserError.LineNumber, parserError.Message)
 		}
 		os.Exit(3)
 	}
