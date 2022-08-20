@@ -1,12 +1,15 @@
 package config
 
+import (
+	p "path"
+	"strings"
+)
+
 type Bindings struct {
 	Sources      []string
 	Destinations []string
 
-	DestinationPrefix       string // prefix which will be joined to destination path
-	DestinationPrefixWasSet bool   // indicates if d.p. was set in the config file
-	LongestSourceLength     int    // needed for pretty output
+	LongestSourceLength int // needed for pretty output
 }
 
 func (bindings *Bindings) appendBinding(source string, destination string) {
@@ -19,12 +22,14 @@ func (bindings *Bindings) appendBinding(source string, destination string) {
 }
 
 func newBindings() Bindings {
-	return Bindings{LongestSourceLength: 0, DestinationPrefix: "./"}
+	return Bindings{LongestSourceLength: 0}
 }
 
 type Additions struct {
-	LongestPathLength int      // needed for pretty output
-	Paths             []string // list of additions
+	Paths []string // list of additions
+
+	LongestPathLength int // needed for pretty output
+
 }
 
 func (additions *Additions) appendAddition(path string) {
@@ -42,11 +47,39 @@ func newAdditions() Additions {
 type Config struct {
 	Bindings  Bindings
 	Additions Additions
+	Pins      []string
+
+	Context       string
+	ContextWasSet bool
+}
+
+func (config *Config) AppendPin(path string) {
+	config.Pins = append(config.Pins, path)
+}
+
+func (config *Config) PathIsDestination(path string) bool {
+	for _, destination := range config.Bindings.Destinations {
+		if strings.HasSuffix(p.Clean(destination), p.Clean(path)) { // todo test
+			return true
+		}
+	}
+	return false
+}
+
+func (config *Config) PathIsPinned(path string) bool {
+	for _, pin := range config.Pins {
+		if strings.HasSuffix(p.Clean(pin), p.Clean(path)) { // todo test
+			return true
+		}
+	}
+	return false
 }
 
 func newConfig() *Config {
 	return &Config{
-		Bindings:  newBindings(),
-		Additions: newAdditions(),
+		Bindings:      newBindings(),
+		Additions:     newAdditions(),
+		Context:       "./",
+		ContextWasSet: false,
 	}
 }

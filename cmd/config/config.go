@@ -7,7 +7,6 @@ import (
 	"github.com/jieggii/dcfg/cmd/util"
 	"os"
 	p "path"
-	"strconv"
 	"strings"
 )
 
@@ -16,13 +15,20 @@ type ParserError struct {
 	Message    string
 }
 
+func newParserErrorArgumentsCountMissmatch(lineNumber int, directive string, expected int, got int) ParserError {
+	return ParserError{
+		LineNumber: lineNumber,
+		Message:    fmt.Sprintf("'%v' directive requires exactly %v argument(s), got %v", directive, expected, got),
+	}
+}
+
 func CreateConfig(path string) error {
 	content := `# This is an example dcfg config file.
 # More information about dcfg config files can be found here: https://github.com/jieggii/dcfg.
 
-# 'dest' directive - set directory where all config files will be placed.
-# Syntax: dest [path].
-dest ./  # ./ is default value
+# 'ctx' directive - set context directory (can be used only once).
+# Syntax: ctx [local path].
+ctx ./  # ./ is default value
 
 # Bindings (order makes sense):
 # 'bind' directive - bind absolute path to a local one.
@@ -37,6 +43,11 @@ bind / root/  # directories and files from / will be copied to ./root/
 # add ~/.Xresources  # ~/.Xresources will be copied to ./home/.Xresources
 # add /etc/hostname  # /etc/hostname will be copied to ./root/etc/hostname
 
+# Pins:
+# 'pin' directive - pin non-addition file or directory so that it will not be removed.
+# Syntax: pin [local path]
+pin .git
+pin README.md
 `
 	if _, err := os.Stat(path); err == nil {
 		return errors.New("file already exists")
@@ -66,23 +77,25 @@ func parseConfig(content string) (*Config, []ParserError) {
 			argsCount := len(args)
 
 			switch directive {
-			case "dest": // dest [path]
+			case "ctx": // ctx [path]
 				if argsCount != 1 {
 					parserErrors = append(
 						parserErrors,
-						ParserError{
+						newParserErrorArgumentsCountMissmatch(
 							lineNumber,
-							"'dest' directive requires exactly one argument, got " + strconv.Itoa(argsCount),
-						},
+							"ctx",
+							1,
+							argsCount,
+						),
 					)
 					break
 				}
-				if config.Bindings.DestinationPrefixWasSet {
+				if config.ContextWasSet {
 					parserErrors = append(
 						parserErrors,
 						ParserError{
 							lineNumber,
-							"'destination' directive may be used only once",
+							"'ctx' directive may be used only once",
 						},
 					)
 					break
@@ -93,22 +106,24 @@ func parseConfig(content string) (*Config, []ParserError) {
 						parserErrors,
 						ParserError{
 							lineNumber,
-							"the only argument of 'destination' directive (path) must be a local path",
+							"the only argument of 'ctx' directive (path) must be a local path",
 						},
 					)
 					break
 				}
-				config.Bindings.DestinationPrefix = path
-				config.Bindings.DestinationPrefixWasSet = true
+				config.Context = path
+				config.ContextWasSet = true
 
 			case "bind": // bind [source] [dest]
 				if argsCount != 2 {
 					parserErrors = append(
 						parserErrors,
-						ParserError{
+						newParserErrorArgumentsCountMissmatch(
 							lineNumber,
-							"'bind' directive requires exactly two arguments, got " + strconv.Itoa(argsCount),
-						},
+							"bind",
+							2,
+							argsCount,
+						),
 					)
 					break
 				}
@@ -138,10 +153,13 @@ func parseConfig(content string) (*Config, []ParserError) {
 				if argsCount != 1 {
 					parserErrors = append(
 						parserErrors,
-						ParserError{
+						newParserErrorArgumentsCountMissmatch(
 							lineNumber,
-							"'add' directive requires exactly one argument, got " + strconv.Itoa(argsCount),
-						})
+							"add",
+							1,
+							argsCount,
+						),
+					)
 					break
 				}
 				path := util.CompilePath(args[0])
@@ -156,6 +174,31 @@ func parseConfig(content string) (*Config, []ParserError) {
 					break
 				}
 				config.Additions.appendAddition(path)
+			case "pin":
+				if argsCount != 1 {
+					parserErrors = append(
+						parserErrors,
+						newParserErrorArgumentsCountMissmatch(
+							lineNumber,
+							"pin",
+							1,
+							argsCount,
+						),
+					)
+					break
+				}
+				path := args[0]
+				if p.IsAbs(path) {
+					parserErrors = append(
+						parserErrors,
+						ParserError{
+							lineNumber,
+							"the only argument of 'pin' directive (path) must be a local path",
+						},
+					)
+					break
+				}
+				config.AppendPin(path)
 			default:
 				parserErrors = append(
 					parserErrors,
