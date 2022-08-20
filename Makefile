@@ -1,9 +1,6 @@
-.PHONY: all build test install
+.PHONY: all build install
 
 all: build
-
-test:
-	@echo "No tests written yet..."
 
 build:
 	mkdir -p ./dist/

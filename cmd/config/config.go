@@ -32,7 +32,7 @@ ctx ./  # ./ is default value
 
 # Bindings (order makes sense):
 # 'bind' directive - bind absolute path to a local one.
-# Syntax: bind [absolute path] [local path].
+# Syntax: bind [absolute path] [local path (relative to the context dir path)].
 bind ~ home/  # directories and files from $HOME will be copied to ./home/
 bind / root/  # directories and files from / will be copied to ./root/
 
@@ -44,8 +44,8 @@ bind / root/  # directories and files from / will be copied to ./root/
 # add /etc/hostname  # /etc/hostname will be copied to ./root/etc/hostname
 
 # Pins:
-# 'pin' directive - pin non-addition file or directory so that it will not be removed.
-# Syntax: pin [local path]
+# 'pin' directive - pin non-addition file or directory so that it will not be removed when running 'dcfg clean'.
+# Syntax: pin [local path (relative to the context dir path)]
 pin .git
 pin README.md
 `
