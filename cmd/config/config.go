@@ -46,8 +46,8 @@ bind / root/  # directories and files from / will be copied to ./root/
 # Pins:
 # 'pin' directive - pin non-addition file or directory so that it will not be removed when running 'dcfg clean'.
 # Syntax: pin [local path (relative to the context dir path)]
-pin .git
 pin README.md
+
 `
 	if _, err := os.Stat(path); err == nil {
 		return errors.New("file already exists")
@@ -60,7 +60,7 @@ pin README.md
 
 func parseConfig(content string) (*Config, []ParserError) {
 	var parserErrors []ParserError
-	config := newConfig()
+	config := NewConfig()
 
 	lines := strings.Split(content, "\n")
 	for i, line := range lines {

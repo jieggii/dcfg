@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jieggii/dcfg/cmd/config"
 	"github.com/jieggii/dcfg/cmd/log"
+	"github.com/jieggii/dcfg/cmd/util"
 	cp "github.com/otiai10/copy"
 	"github.com/urfave/cli/v2"
 	"os"
@@ -14,20 +15,32 @@ import (
 
 func Add(context *cli.Context) error {
 	cfgPath := context.String("config")
+	dryRun := context.Bool("dry")
 	cfg := config.ReadConfig(cfgPath)
+	if dryRun {
+		util.LogDryRun()
+	}
+
 	if len(cfg.Additions.Paths) == 0 {
 		log.Error("Error: nothing to do (there are no `add` directives in `%v`).", cfgPath)
 		os.Exit(0)
 	}
-	log.Info(
-		"Copying additions to the context directory '%v' according to these bindings:",
-		cfg.Context,
-	)
+	if len(cfg.Bindings.Sources) == 0 {
+		log.Info("Copying additions to the context directory '%v'.", cfg.Context)
+
+	} else {
+		log.Info(
+			"Copying additions to the context directory '%v' according to these bindings:",
+			cfg.Context,
+		)
+	}
 	for i, source := range cfg.Bindings.Sources {
 		destination := cfg.Bindings.Destinations[i]
 		log.Info("%v. %-"+strconv.Itoa(cfg.Bindings.LongestSourceLength)+"v : %v", i+1, source, destination)
 	}
-	fmt.Println("")
+	if len(cfg.Bindings.Sources) != 0 {
+		fmt.Println("")
+	}
 	for _, globalPath := range cfg.Additions.Paths {
 		matched := false
 		for i, source := range cfg.Bindings.Sources {
@@ -37,7 +50,13 @@ func Add(context *cli.Context) error {
 				localPath := strings.Replace(globalPath, source, destination, 1)
 				localPath = p.Clean(localPath)
 				localPath = p.Join(cfg.Context, localPath)
-				if err := cp.Copy(globalPath, localPath); err != nil {
+				var err error
+				if dryRun {
+					err = nil
+				} else {
+					err = cp.Copy(globalPath, localPath)
+				}
+				if err != nil {
 					log.Info("Warning: could not copy '%v' to '%v' (%v)", globalPath, localPath, err)
 				} else {
 					log.Info("(+) %-"+strconv.Itoa(cfg.Additions.LongestPathLength)+"v -> %v", globalPath, localPath)
@@ -49,6 +68,5 @@ func Add(context *cli.Context) error {
 			log.Info("Warning: ignoring unmatched addition: %v", globalPath)
 		}
 	}
-
 	return nil
 }

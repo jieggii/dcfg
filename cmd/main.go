@@ -28,12 +28,18 @@ func main() {
 				Value:   "dcfg.conf",
 				Aliases: []string{"c"},
 			},
+			&cli.BoolFlag{
+				Name:    "dry",
+				Usage:   "dry run",
+				Value:   false,
+				Aliases: []string{"d"},
+			},
 		},
 		Commands: []*cli.Command{
 			{
 				Name:         "init",
 				Aliases:      []string{"i"},
-				Usage:        "create dcfg config file in the current working directory",
+				Usage:        "create dcfg config file",
 				UsageText:    "dcfg init",
 				Action:       commands.Init,
 				OnUsageError: util.HandleUsageError,
@@ -47,18 +53,10 @@ func main() {
 				OnUsageError: util.HandleUsageError,
 			},
 			{
-				Name:      "clean",
-				Aliases:   []string{"c"},
-				Usage:     "clean context directory (except additions and pins)",
-				UsageText: "dcfg clean",
-				Flags: []cli.Flag{
-					&cli.BoolFlag{
-						Name:    "dry",
-						Aliases: []string{"d"},
-						Usage:   "dry run",
-						Value:   false,
-					},
-				},
+				Name:         "clean",
+				Aliases:      []string{"c"},
+				Usage:        "remove everything from context directory excepting additions, pins, dcfg config file and .git directory",
+				UsageText:    "dcfg clean",
 				Action:       commands.Clean,
 				OnUsageError: util.HandleUsageError,
 			},

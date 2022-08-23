@@ -10,10 +10,19 @@ import (
 
 func Init(context *cli.Context) error {
 	cfgPath := context.String("config")
-	if context.Args().Len() != 0 {
-		util.ThrowUsageError(context, "too many arguments")
+	dryRun := context.Bool("dry")
+	util.CheckCommandArgsCount(context, 0)
+	if dryRun {
+		util.LogDryRun()
 	}
-	if err := config.CreateConfig(cfgPath); err != nil {
+
+	var err error
+	if dryRun {
+		err = nil
+	} else {
+		err = config.CreateConfig(cfgPath)
+	}
+	if err != nil {
 		log.Error("Error: could not create dcfg config file `%v`: %v.", cfgPath, err)
 		os.Exit(2)
 	}

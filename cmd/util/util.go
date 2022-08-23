@@ -27,6 +27,10 @@ func CompilePath(path string) string {
 	return path
 }
 
+func LogDryRun() {
+	log.Info("(Dry run)")
+}
+
 func LogCommandUsageError(context *cli.Context, err error) {
 	var commandName string
 	var usageText string
@@ -52,4 +56,10 @@ func HandleUsageError(context *cli.Context, err error, _ bool) error {
 	LogCommandUsageError(context, err)
 	os.Exit(1)
 	return nil
+}
+
+func CheckCommandArgsCount(context *cli.Context, expected int) {
+	if context.Args().Len() != expected {
+		ThrowUsageError(context, "too many arguments")
+	}
 }

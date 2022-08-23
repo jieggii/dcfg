@@ -66,7 +66,7 @@ func (config *Config) PathIsDestination(path string) bool {
 	return false
 }
 
-func (config *Config) PathIsPinned(path string) bool {
+func (config *Config) PathIsPin(path string) bool {
 	for _, pin := range config.Pins {
 		if strings.HasSuffix(p.Clean(pin), p.Clean(path)) { // todo test
 			return true
@@ -75,7 +75,7 @@ func (config *Config) PathIsPinned(path string) bool {
 	return false
 }
 
-func newConfig() *Config {
+func NewConfig() *Config {
 	return &Config{
 		Bindings:      newBindings(),
 		Additions:     newAdditions(),
