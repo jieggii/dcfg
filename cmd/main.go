@@ -55,7 +55,7 @@ func main() {
 			{
 				Name:         "clean",
 				Aliases:      []string{"c"},
-				Usage:        "remove everything from context directory excepting additions, pins, dcfg config file and .git directory",
+				Usage:        "remove everything from the context directory excepting additions, pins, dcfg config file and git directory",
 				UsageText:    "dcfg clean",
 				Action:       commands.Clean,
 				OnUsageError: util.HandleUsageError,

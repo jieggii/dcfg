@@ -60,7 +60,7 @@ pin README.md
 
 func parseConfig(content string) (*Config, []ParserError) {
 	var parserErrors []ParserError
-	config := NewConfig()
+	config := newConfig()
 
 	lines := strings.Split(content, "\n")
 	for i, line := range lines {

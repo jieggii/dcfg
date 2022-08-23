@@ -75,7 +75,7 @@ func (config *Config) PathIsPin(path string) bool {
 	return false
 }
 
-func NewConfig() *Config {
+func newConfig() *Config {
 	return &Config{
 		Bindings:      newBindings(),
 		Additions:     newAdditions(),
