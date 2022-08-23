@@ -1,5 +1,3 @@
-# dcfg - distribute config
-Simple tool for copying and distributing your config files.
+*dcfg - distribute config*
 
-## Installation
-`sudo make install`
+Simple tool for copying and distributing your config files.
