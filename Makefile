@@ -11,5 +11,5 @@ install:
 
 fmt:
 	# https://github.com/segmentio/golines
-	golines --max-len 120 ./cmd/
-	go fmt -w ./cmd/
+	golines --max-len 120 --write-output ./cmd/
+	gofmt -w -s ./cmd/
