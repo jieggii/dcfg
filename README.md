@@ -21,12 +21,19 @@ Then you will need to define ***bindings***, ***additions***, optionally
 ***context directory*** and ***pins***. More information about dcfg config files can be found below.
 
 After that, to copy defined ***additions*** to the ***context directory*** respecting
-***bindings*** run
+***bindings*** run:
 
 `dcfg add`
 
 Here you are!
 
+To remove outdated additions (which were defined in the dcfg config file, 
+were added using `dcfg add` command, but after a while were removed from it)
+from context directory simply run:
+
+`dcfg clean`
+
+This command will not remove `.git` directory, dcfg config file and pinned directories and files.
 
 ## dcfg config file
 There are 4 entities:
