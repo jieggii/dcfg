@@ -30,7 +30,34 @@ Here you are!
 
 ## dcfg config file
 There are 4 entities:
-* ***addition*** - global path to some directory or file which you want to store using dcfg. 
-* ***context directory*** (`./` by default) - directory where all additions will be put.
-* ***binding*** - global path to local path (relative to ***context directory***) binding.
-* ***pin*** - alien directory or file which you want to store with ***additions*** (e.g. readme file or `.git` directory).
+* ***addition*** (`add` directive) - global path to some directory or file which you want to store using dcfg. 
+* ***context directory*** (`ctx` directive) - directory where all additions will be put.
+* ***binding*** (`bind` directive) - global path to local path (relative to ***context directory***) binding.
+* ***pin*** - (`pin` directive) - alien directory or file which you want to store with ***additions*** (e.g. readme file or `.git` directory).
+
+The only required thing to be defined are ***additions***.
+
+Example dcfg config file:
+```
+# 'ctx' directive - set context directory (can be used only once).
+# Syntax: ctx [local path].
+ctx ./  # ./ is default value
+
+# Bindings (order makes sense):
+# 'bind' directive - bind absolute path to a local one.
+# Syntax: bind [absolute path] [local path (relative to the context dir path)].
+bind ~ home/  # directories and files from $HOME will be copied to ./home/
+bind / root/  # directories and files from / will be copied to ./root/
+
+# Additions:
+# 'add' directive - copy directories and files to the destination directory respecting bindings.
+# Syntax: add [absolute path]
+# add ~/.config/i3   # ~/.config/i3  will be copied to ./home/.config/i3
+# add ~/.Xresources  # ~/.Xresources will be copied to ./home/.Xresources
+# add /etc/hostname  # /etc/hostname will be copied to ./root/etc/hostname
+
+# Pins:
+# 'pin' directive - pin non-addition file or directory so that it will not be removed when running 'dcfg clean'.
+# Syntax: pin [local path (relative to the context dir path)]
+pin README.md
+```
