@@ -60,14 +60,6 @@ func main() {
 				Action:       commands.Clean,
 				OnUsageError: util.HandleUsageError,
 			},
-			{
-				Name:         "push",
-				Aliases:      []string{"p"},
-				Usage:        "add, commit and push changes to a remote git repository",
-				UsageText:    "dcfg push",
-				Action:       commands.Push,
-				OnUsageError: util.HandleUsageError,
-			},
 		},
 		HideHelpCommand: true,
 		Action: func(context *cli.Context) error {
