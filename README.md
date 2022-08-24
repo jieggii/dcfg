@@ -12,11 +12,11 @@ sudo make install
 ```
 
 ## How to use
-First of all, you will need an empty directory where config files will be put by dcfg.
+First of all you will need an empty directory where configs will be put by dcfg.
 I hope you will find one! It also may be a git repo.
 
-You need to create a dcfg config file (`dcfg.conf` by default) in this directory. You can use 
-`dcfg init` or `touch dcfg.conf` commands. 
+You need to create a dcfg config file (`dcfg.conf` by default) inside this directory. You can use 
+`dcfg init` or `touch dcfg.conf` command. 
 Then you will need to define ***bindings***, ***additions***, optionally 
 ***context directory*** and ***pins***. More information about dcfg config files can be found below.
 
@@ -35,7 +35,7 @@ There are 4 entities:
 * ***binding*** (`bind` directive) - global path to local path (relative to ***context directory***) binding.
 * ***pin*** - (`pin` directive) - alien directory or file which you want to store with ***additions*** (e.g. readme file or `.git` directory).
 
-The only required thing to be defined are ***additions***.
+The only required things to be defined are ***additions*** and ***bindings***.
 
 Example dcfg config file:
 ```
@@ -52,9 +52,9 @@ bind / root/  # directories and files from / will be copied to ./root/
 # Additions:
 # 'add' directive - copy directories and files to the destination directory respecting bindings.
 # Syntax: add [absolute path]
-# add ~/.config/i3   # ~/.config/i3  will be copied to ./home/.config/i3
-# add ~/.Xresources  # ~/.Xresources will be copied to ./home/.Xresources
-# add /etc/hostname  # /etc/hostname will be copied to ./root/etc/hostname
+add ~/.config/i3   # ~/.config/i3  will be copied to ./home/.config/i3
+add ~/.Xresources  # ~/.Xresources will be copied to ./home/.Xresources
+add /etc/hostname  # /etc/hostname will be copied to ./root/etc/hostname
 
 # Pins:
 # 'pin' directive - pin non-addition file or directory so that it will not be removed when running 'dcfg clean'.
