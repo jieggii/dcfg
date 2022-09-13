@@ -40,7 +40,7 @@ There are 4 entities:
 * ***addition*** (`add` directive) - global path to some directory or file which you want to store using dcfg. 
 * ***context directory*** (`ctx` directive) - directory where all additions will be put.
 * ***binding*** (`bind` directive) - global path to local path (relative to ***context directory***) binding.
-* ***pin*** - (`pin` directive) - alien directory or file which you want to store with ***additions*** (e.g. readme file or `.git` directory).
+* ***pin*** - (`pin` directive) - alien directory or file which you want to store with ***additions*** (e.g. readme file).
 
 The only required things to be defined are ***additions*** and ***bindings***.
 
