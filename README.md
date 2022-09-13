@@ -45,7 +45,7 @@ There are 4 entities:
 The only required things to be defined are ***additions*** and ***bindings***.
 
 Example dcfg config file:
-```
+```bash
 # 'ctx' directive - set context directory (can be used only once).
 # Syntax: ctx [local path].
 ctx ./  # ./ is default value
