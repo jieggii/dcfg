@@ -13,7 +13,7 @@ func main() {
 		Name:        "dcfg",
 		Usage:       "distribute config",
 		UsageText:   "dcfg [global options] [command] [command options]",
-		Version:     "0.1.0",
+		Version:     "0.1.1",
 		Description: "Simple tool for copying and distributing your config files.",
 		Authors: []*cli.Author{
 			{

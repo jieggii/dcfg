@@ -28,7 +28,7 @@ func CompilePath(path string) string {
 }
 
 func LogDryRun() {
-	log.Info("(Dry run)")
+	log.Info("(!) dcfg is running in dry-run mode.")
 }
 
 func LogCommandUsageError(context *cli.Context, err error) {
