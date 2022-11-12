@@ -1,5 +1,7 @@
 <p align="center">
     <img alt="dcfg logo" src="https://imgur.com/1t0WNTp.jpg" height=175 />
+</p>
+<p align="center">
     dcfg - distribute config.
 </p>
 
