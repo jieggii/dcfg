@@ -1,6 +1,5 @@
-# dcfg
 <p align="center">
-<img alt="dcfg logo" src="https://imgur.com/1t0WNTp.jpg" height=175 />
+    <img alt="dcfg logo" src="https://imgur.com/1t0WNTp.jpg" height=175 />
 </p>
 
 
