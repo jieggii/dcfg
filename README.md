@@ -16,7 +16,7 @@ make
 sudo make install
 ```
 
-**From AUR**
+**From AUR:**
 
 Coming soon...
 
