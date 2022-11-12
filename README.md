@@ -5,7 +5,7 @@
 <p align="center">Minimalist tool for copying, storing and distributing your system-wide and user config files.</p>
 
 ## Installation
-**From sources:**
+#### From sources:
 ```shell
 git clone https://github.com/jieggii/dcfg
 cd dcfg/
@@ -13,7 +13,7 @@ make
 sudo make install
 ```
 
-**From AUR:**
+#### From AUR:
 
 Coming soon...
 
