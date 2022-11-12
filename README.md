@@ -2,7 +2,7 @@
     <img alt="dcfg logo" src="https://imgur.com/1t0WNTp.jpg" height=175 />
 </p>
 <p align="center">
-    dcfg - distribute config.
+    dcfg - distribute config
 </p>
 
 Minimalist tool for copying, storing and distributing your system-wide and user config files.
