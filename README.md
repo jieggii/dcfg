@@ -16,6 +16,10 @@ make
 sudo make install
 ```
 
+**From AUR**
+
+Coming soon...
+
 ## How to use
 First of all you will need an empty directory where configs will be put by dcfg.
 I hope you will find one! It also may be a git repo.
