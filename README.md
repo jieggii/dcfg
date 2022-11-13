@@ -74,3 +74,6 @@ add /etc/hostname  # /etc/hostname will be copied to ./root/etc/hostname
 # Syntax: pin [local path (relative to the context dir path)]
 pin README.md
 ```
+
+## Example repositories using dcfg
+* [jieggii/matebook14-dotfiles](https://github.com/jieggii/matebook14-dotfiles)
