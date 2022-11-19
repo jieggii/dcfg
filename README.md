@@ -4,6 +4,9 @@
 
 <p align="center">Minimalist tool for copying, storing and distributing your system-wide and user config files.</p>
 
+## Conception
+Long story short - dcfg copies config files from different places to the directory you've chosen. The program has its own config file in this directory and provides you some entities to do it in a more convenient way.
+
 ## Installation
 #### From sources:
 ```shell
@@ -16,6 +19,7 @@ sudo make install
 #### From AUR:
 
 Coming soon...
+
 
 ## How to use
 First of all you will need an empty directory where configs will be put by dcfg.
