@@ -1,15 +1,7 @@
-.PHONY: all build install fmt
+SOURCES := ./cmd/ ./internal/
+MAX_LINE_LENGTH := 120
 
-all: build
-
-build:
-	mkdir -p ./dist/
-	go build -o ./dist/dcfg ./cmd/main.go
-
-install:
-	install -m 755 ./dist/dcfg /usr/bin/dcfg
-
+.PHONY: fmt
 fmt:
-	# https://github.com/segmentio/golines
-	golines --max-len 120 --write-output ./cmd/
-	gofmt -w -s ./cmd/
+	golines --max-len 120 --write-output $(SOURCES)
+	gofmt -w -s $(SOURCES)
