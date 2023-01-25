@@ -34,13 +34,27 @@ func (b *Bindings) UnmarshalYAML(unmarshal func(any) error) error {
 	return nil
 }
 
+func (b Bindings) MarshalYAML() (any, error) {
+	var bindingBatches []map[string]string
+
+	if len(b.Sources) != len(b.Destinations) {
+		panic("count of sources does not match count of destinations")
+	}
+	for i := range b.Sources {
+		batch := make(map[string]string)
+		batch[b.Sources[i]] = b.Destinations[i]
+		bindingBatches = append(bindingBatches, batch)
+	}
+	return bindingBatches, nil
+}
+
 func (b *Bindings) AppendBinding(source string, destination string) error {
-	if itemExists(b.Sources, source) {
+	if itemIsInArray(b.Sources, source) {
 		return fmt.Errorf("path '%v' has already been registered as binding source", source)
 	}
 	b.Sources = append(b.Sources, source)
 
-	if itemExists(b.Destinations, destination) {
+	if itemIsInArray(b.Destinations, destination) {
 		return fmt.Errorf("path '%v' has already been registered as binding destination", destination)
 	}
 	b.Destinations = append(b.Destinations, destination)
@@ -66,8 +80,12 @@ func (a *Additions) UnmarshalYAML(unmarshal func(any) error) error {
 	return nil
 }
 
+func (a Additions) MarshalYAML() (any, error) {
+	return &a.Paths, nil
+}
+
 func (a *Additions) AppendAddition(path string) error {
-	if itemExists(a.Paths, path) {
+	if itemIsInArray(a.Paths, path) {
 		return fmt.Errorf("path '%v' has already been added", path)
 	}
 	a.Paths = append(a.Paths, path)
@@ -94,8 +112,12 @@ func (p *Pins) UnmarshalYAML(unmarshal func(any) error) error {
 	return nil
 }
 
+func (p Pins) MarshalYAML() (any, error) {
+	return &p.Paths, nil
+}
+
 func (p *Pins) AppendPin(path string) error {
-	if itemExists(p.Paths, path) {
+	if itemIsInArray(p.Paths, path) {
 		return fmt.Errorf("path '%v' is already pinned", path)
 	}
 	p.Paths = append(p.Paths, path)
@@ -106,9 +128,20 @@ func (p *Pins) AppendPin(path string) error {
 type Config struct {
 	Context string `yaml:"context"` // path to context directory
 
-	Bindings  Bindings  `yaml:"bindings"`  // path-to-path bindings
-	Additions Additions `yaml:"additions"` // paths to additions
-	Pins      Pins      `yaml:"pins"`      // paths to pins
+	Bindings  Bindings  `yaml:"bindings,flow"`  // path-to-path bindings
+	Additions Additions `yaml:"additions,flow"` // paths to additions
+	Pins      Pins      `yaml:"pins,flow"`      // paths to pins
+}
+
+func (c *Config) DumpToFile(path string) error {
+	data, err := yaml.Marshal(c)
+	if err != nil {
+		panic(fmt.Errorf("unable to marshal config (%v)", err))
+	}
+	if err = os.WriteFile(path, data, 0644); err != nil {
+		return err
+	}
+	return nil
 }
 
 func NewConfig() *Config {
@@ -125,7 +158,7 @@ func NewConfigFromFile(path string) (*Config, error) {
 
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("error opening config %v: %v", path, err)
+		return nil, fmt.Errorf("could not open config %v (%v)", path, err)
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
@@ -135,12 +168,12 @@ func NewConfigFromFile(path string) (*Config, error) {
 
 	data, err := io.ReadAll(file)
 	if err != nil {
-		return nil, fmt.Errorf("error reading config %v: %v", path, err)
+		return nil, fmt.Errorf("could not read config %v (%v)", path, err)
 	}
 
 	err = yaml.Unmarshal(data, cfg)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing config %v: %v", path, err)
+		return nil, fmt.Errorf("could not parse config %v (%v)", path, err)
 	}
 	return cfg, nil
 }
