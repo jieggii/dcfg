@@ -18,7 +18,7 @@ func intervalArgsCountMiddleware(minArgsCount int, maxArgsCount int, action cli.
 			return action(ctx)
 		} else {
 			return fmt.Errorf(
-				"%v commands takes from %v to %v arguments, got %v.\nusage: %v",
+				"%v command takes from %v to %v arguments, got %v.\nusage: %v",
 				ctx.Command.Name, minArgsCount, maxArgsCount, argsCount, ctx.Command.UsageText,
 			)
 		}

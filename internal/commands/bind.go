@@ -26,7 +26,7 @@ func Bind(ctx *cli.Context) error {
 
 	if remove {
 		if argsCount != 1 {
-			return fmt.Errorf("bind command with '--remove' flag takes only 1 argument (got %v) - [source].\nusage: %v", argsCount, ctx.Command.UsageText)
+			return fmt.Errorf("bind command with '--remove' flag takes only 1 argument (got %v) - source.\nusage: %v", argsCount, ctx.Command.UsageText)
 		}
 		destination, err := cfg.Bindings.ResolveDestination(source)
 		if err != nil {
