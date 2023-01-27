@@ -10,7 +10,7 @@ import (
 const configFilePermission = 0644
 
 type Config struct {
-	Context string `json:"context"` // path to context directory
+	Context Context `json:"context"` // path to context directory
 
 	Bindings  Bindings  `json:"bindings"`  // path-to-path bindings
 	Additions Additions `json:"additions"` // paths to additions
@@ -31,7 +31,7 @@ func (c *Config) DumpToFile(path string) error {
 
 func NewConfig() *Config {
 	return &Config{
-		Context:   "./",
+		Context:   ".",
 		Bindings:  Bindings{},
 		Additions: Additions{},
 		Pinned:    Pinned{},

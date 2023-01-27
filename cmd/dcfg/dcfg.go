@@ -85,6 +85,23 @@ func main() {
 					},
 				},
 			},
+			{
+				Name:         "pin",
+				Aliases:      []string{"pin"},
+				Usage:        "pin file or directory",
+				UsageText:    "dcfg [--config] pin [--remove] <PATH>",
+				Description:  "pins file or directory inside context directory",
+				Action:       explicitArgsCountMiddleware(1, commands.Pin),
+				OnUsageError: handleUsageError,
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:    "remove",
+						Usage:   "remove pinned file or directory",
+						Value:   false,
+						Aliases: []string{"r"},
+					},
+				},
+			},
 		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
