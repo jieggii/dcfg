@@ -8,25 +8,46 @@ import (
 	"os"
 )
 
-const defaultConfigFilename = "dcfg.yaml"
+const defaultConfigFilename = "dcfg.json"
 
-func argsCountMiddleware(expectedArgsCount int, action cli.ActionFunc) cli.ActionFunc {
+func intervalArgsCountMiddleware(minArgsCount int, maxArgsCount int, action cli.ActionFunc) cli.ActionFunc {
+	return func(ctx *cli.Context) error {
+		args := ctx.Args()
+		argsCount := args.Len()
+		if argsCount >= minArgsCount && argsCount <= maxArgsCount {
+			return action(ctx)
+		} else {
+			return fmt.Errorf(
+				"%v commands takes from %v to %v arguments, got %v.\nusage: %v",
+				ctx.Command.Name, minArgsCount, maxArgsCount, argsCount, ctx.Command.UsageText,
+			)
+		}
+	}
+}
+
+func explicitArgsCountMiddleware(expectedArgsCount int, action cli.ActionFunc) cli.ActionFunc {
 	return func(ctx *cli.Context) error {
 		args := ctx.Args()
 		if args.Len() == expectedArgsCount {
 			return action(ctx)
 		} else {
 			if expectedArgsCount == 0 {
-				return fmt.Errorf("%v command takes no arguments, got %v.\nusage: %v", ctx.Command.Name, args.Len(), ctx.Command.UsageText)
+				return fmt.Errorf(
+					"%v command takes no arguments, got %v.\nusage: %v",
+					ctx.Command.Name, args.Len(), ctx.Command.UsageText,
+				)
 			} else {
-				return fmt.Errorf("%v command takes exactly %v argument(s), got %v.\nusage: %v", ctx.Command.Name, expectedArgsCount, args.Len(), ctx.Command.UsageText)
+				return fmt.Errorf(
+					"%v command takes exactly %v argument(s), got %v.\nusage: %v",
+					ctx.Command.Name, expectedArgsCount, args.Len(), ctx.Command.UsageText,
+				)
 			}
 		}
 	}
 }
 
 func handleUsageError(ctx *cli.Context, err error, _ bool) error {
-	output.Info.Printf("usage: %v\n", ctx.Command.UsageText)
+	output.Stdout.Printf("usage: %v\n", ctx.Command.UsageText)
 	return err
 }
 
@@ -44,17 +65,25 @@ func main() {
 				Usage:        "initialize dcfg",
 				UsageText:    "dcfg [--config PATH] init",
 				Description:  "creates dcfg config file",
-				Action:       argsCountMiddleware(0, commands.Init),
+				Action:       explicitArgsCountMiddleware(0, commands.Init),
 				OnUsageError: handleUsageError,
 			},
 			{
 				Name:         "bind",
 				Aliases:      []string{"b"},
 				Usage:        "create new binding",
-				UsageText:    "dcfg [--config PATH] bind [source] [destination]",
-				Description:  "creates new path-to-path binding (global to relative)",
-				Action:       argsCountMiddleware(2, commands.Bind),
+				UsageText:    "dcfg [--config PATH] bind [--remove] <source> [destination]",
+				Description:  "creates new path-to-path binding (absolute to relative)",
+				Action:       intervalArgsCountMiddleware(1, 2, commands.Bind),
 				OnUsageError: handleUsageError,
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:    "remove",
+						Usage:   "remove binding",
+						Value:   false,
+						Aliases: []string{"r"},
+					},
+				},
 			},
 		},
 		Flags: []cli.Flag{
