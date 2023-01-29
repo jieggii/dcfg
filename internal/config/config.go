@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 const configFilePermission = 0644
@@ -16,6 +17,24 @@ type Config struct {
 	Additions Additions `json:"additions"` // paths to additions
 	Pinned    Pinned    `json:"pins"`      // paths to pinned objects
 }
+
+func (c *Config) ResolveAdditionDestination(addition string) (string, bool) {
+	for _, bindingSource := range c.Bindings.Sources {
+		if strings.HasPrefix(addition, bindingSource) {
+			bindingDestination, err := c.Bindings.ResolveDestination(bindingSource)
+			if err != nil {
+				panic(err)
+			}
+			destination := strings.Replace(addition, bindingSource, bindingDestination, 1)
+			return destination, true
+		}
+	}
+	return "", false
+}
+
+//func (c *Config) AdditionIsCollected(destination string) bool {
+//
+//}
 
 func (c *Config) DumpToFile(path string) error {
 	data, err := json.MarshalIndent(c, "", " ")

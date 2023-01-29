@@ -1,26 +1,72 @@
 package config
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/jieggii/dcfg/internal/fs"
+)
 
-type Additions []string
+type Additions struct {
+	Paths []string // absolute paths to additions
+
+	LongestPathLen int
+}
+
+func (a Additions) MarshalJSON() ([]byte, error) {
+	data, err := json.Marshal(a.Paths)
+	return data, err
+}
+
+func (a *Additions) UnmarshalJSON(data []byte) error {
+	var paths []string
+
+	if err := json.Unmarshal(data, &paths); err != nil {
+		return err
+	}
+	for _, path := range paths {
+		err := a.Append(path)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 func (a *Additions) Append(path string) error {
 	if a.Exists(path) {
 		return fmt.Errorf("path '%v' is already registered as addition", path)
 	}
-	*a = append(*a, path)
+	a.Paths = append(a.Paths, path)
+
+	pathLen := len(path)
+	if pathLen > a.LongestPathLen {
+		a.LongestPathLen = pathLen
+	}
+
 	return nil
 }
 
 func (a *Additions) Remove(path string) error {
-	i := itemIndex(*a, path)
+	i := itemIndex(a.Paths, path)
 	if i == -1 {
 		return fmt.Errorf("path '%v' is not registered as addition", path)
 	}
-	*a = removeItem(*a, i)
+	a.Paths = removeItem(a.Paths, i)
 	return nil
 }
 
 func (a *Additions) Exists(path string) bool {
-	return itemIsInArray(*a, path)
+	return itemIsInArray(a.Paths, path)
+}
+
+func (a *Additions) IsPresent() bool {
+	return len(a.Paths) != 0
+}
+
+func (a *Additions) IsCollected(destination string) (bool, error) {
+	collected, err := fs.DirectoryExists(destination)
+	if err != nil {
+		return false, fmt.Errorf("could not check if '%v' exists (%v)", destination, err)
+	}
+	return collected, nil
 }

@@ -24,3 +24,7 @@ func (p *Pinned) Remove(path string) error {
 func (p *Pinned) Exists(path string) bool {
 	return itemIsInArray(*p, path)
 }
+
+func (p *Pinned) IsPresent() bool {
+	return len(*p) != 0
+}

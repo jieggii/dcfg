@@ -10,6 +10,8 @@ const bindingWithSourceDoesNotExistErrorText = "binding with source '%v' does no
 type Bindings struct {
 	Sources      []string // list of absolute paths to sources
 	Destinations []string // list of relative to Config.Context paths to destinations
+
+	LongestSourceLen int
 }
 
 func (b Bindings) MarshalJSON() ([]byte, error) {
@@ -52,8 +54,14 @@ func (b *Bindings) Append(source string, destination string) error {
 	}
 	b.Sources = append(b.Sources, source)
 
+	sourceLength := len(source)
+	if sourceLength > b.LongestSourceLen {
+		b.LongestSourceLen = sourceLength
+	}
+
 	// not checking if destination exists 'cause same destination may be used with multiple sources
 	b.Destinations = append(b.Destinations, destination)
+
 	return nil
 }
 
@@ -82,4 +90,8 @@ func (b *Bindings) SourceExists(path string) bool {
 
 func (b *Bindings) DestinationExists(path string) bool {
 	return itemIsInArray(b.Destinations, path)
+}
+
+func (b *Bindings) IsPresent() bool {
+	return len(b.Sources) != 0
 }

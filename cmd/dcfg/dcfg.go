@@ -58,6 +58,14 @@ func main() {
 		UsageText:   "dcfg [--config PATH] command [command options]",
 		Version:     "0.2.0",
 		Description: "Minimalist tool for copying, storing and distributing your system-wide and user config files.",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "config",
+				Usage:   "dcfg config file `PATH`",
+				Value:   defaultConfigFilename,
+				Aliases: []string{"c"},
+			},
+		},
 		Commands: []*cli.Command{
 			{
 				Name:         "init",
@@ -69,13 +77,12 @@ func main() {
 				OnUsageError: handleUsageError,
 			},
 			{
-				Name:         "bind",
-				Aliases:      []string{"b"},
-				Usage:        "create new binding",
-				UsageText:    "dcfg [--config PATH] bind [--remove] <source> [destination]",
-				Description:  "creates new path-to-path binding (absolute to relative)",
-				Action:       intervalArgsCountMiddleware(1, 2, commands.Bind),
-				OnUsageError: handleUsageError,
+				Name:        "bind",
+				Aliases:     []string{"b"},
+				Usage:       "create new binding",
+				UsageText:   "dcfg [--config PATH] bind [--remove] <source> [destination]",
+				Description: "creates new path-to-path binding (absolute to relative)",
+				Action:      intervalArgsCountMiddleware(1, 2, commands.Bind),
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:    "remove",
@@ -84,31 +91,68 @@ func main() {
 						Aliases: []string{"r"},
 					},
 				},
+				OnUsageError: handleUsageError,
+			},
+
+			{
+				Name:        "add",
+				Aliases:     []string{"a"},
+				Usage:       "append addition",
+				UsageText:   "dcfg [--config] add <PATH>",
+				Description: "creates new addition (without copying it)",
+				Action:      explicitArgsCountMiddleware(1, commands.Add),
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:    "collect",
+						Usage:   "copy addition to context directory according to the bindings",
+						Value:   false,
+						Aliases: []string{"c"},
+					},
+				},
+				OnUsageError: handleUsageError,
 			},
 			{
-				Name:         "pin",
-				Aliases:      []string{"pin"},
-				Usage:        "pin file or directory",
-				UsageText:    "dcfg [--config] pin [--remove] <PATH>",
-				Description:  "pins file or directory inside context directory",
-				Action:       explicitArgsCountMiddleware(1, commands.Pin),
+				Name:        "remove",
+				Aliases:     []string{"rm"},
+				Usage:       "remove addition",
+				UsageText:   "dcfg [--config] remove <PATH>",
+				Description: "removes addition",
+				Action:      explicitArgsCountMiddleware(1, commands.Remove),
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:    "soft",
+						Usage:   "do not remove collected objects from context directory",
+						Value:   false,
+						Aliases: []string{"s"},
+					},
+				},
 				OnUsageError: handleUsageError,
+			},
+			{
+				Name:        "pin",
+				Aliases:     []string{"p"},
+				Usage:       "pin file or directory",
+				UsageText:   "dcfg [--config] pin [--remove] <PATH>",
+				Description: "pins file or directory inside context directory",
+				Action:      explicitArgsCountMiddleware(1, commands.Pin),
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:    "remove",
-						Usage:   "remove pinned file or directory",
 						Value:   false,
+						Usage:   "remove pinned object",
 						Aliases: []string{"r"},
 					},
 				},
+				OnUsageError: handleUsageError,
 			},
-		},
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:    "config",
-				Usage:   "dcfg config file `PATH`",
-				Value:   defaultConfigFilename,
-				Aliases: []string{"c"},
+			{
+				Name:         "status",
+				Aliases:      []string{"s"},
+				Usage:        "shows information about current state",
+				UsageText:    "dcfg [--config] status",
+				Description:  "shows context directory, defined bindings, pinned directories and additions",
+				Action:       explicitArgsCountMiddleware(0, commands.Status),
+				OnUsageError: handleUsageError,
 			},
 		},
 		HideHelpCommand: true,
