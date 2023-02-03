@@ -4,6 +4,7 @@ import (
 	"github.com/jieggii/dcfg/internal/config"
 	"github.com/jieggii/dcfg/internal/output"
 	"github.com/urfave/cli/v2"
+	"path"
 	"strconv"
 )
 
@@ -40,12 +41,11 @@ func Status(ctx *cli.Context) error {
 	output.Stdout.Println("additions:")
 	if cfg.Additions.IsPresent() {
 		for _, addition := range cfg.Additions.Paths {
-			// todo: resolve destination path
-			// todo: indicate if addition is stored
 			destination, resolved := cfg.ResolveAdditionDestination(addition)
 			if !resolved {
 				destination = "[MISSING SUITABLE BINDING]"
 			}
+			destination = path.Join(cfg.Context.String(), destination)
 
 			var collectedString string
 			collected, err := cfg.Additions.IsCollected(destination)

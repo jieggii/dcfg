@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func CopyAddition(addition string, destination string) error {
+func Copy(addition string, destination string) error {
 	options := cp.Options{
 		OnSymlink: func(_ string) cp.SymlinkAction {
 			return cp.Deep

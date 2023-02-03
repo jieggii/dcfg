@@ -32,9 +32,23 @@ func (c *Config) ResolveAdditionDestination(addition string) (string, bool) {
 	return "", false
 }
 
-//func (c *Config) AdditionIsCollected(destination string) bool {
-//
-//}
+func (c *Config) ResolveAdditionSource(additionDestination string) (string, bool) {
+	for _, addition := range c.Additions.Paths {
+		destination, resolved := c.ResolveAdditionDestination(addition)
+		fmt.Println(destination)
+		if resolved {
+			if destination == additionDestination {
+				return addition, true
+			}
+		}
+	}
+	return "", false
+}
+
+// todo
+func (c *Config) Validate() []error {
+	return nil
+}
 
 func (c *Config) DumpToFile(path string) error {
 	data, err := json.MarshalIndent(c, "", " ")

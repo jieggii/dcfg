@@ -33,11 +33,13 @@ func Add(ctx *cli.Context) error {
 	if collect {
 		destination, resolved := cfg.ResolveAdditionDestination(addition)
 		if !resolved {
-			return errors.New("missing suitable binding for the addition")
+			return errors.New("didn't collect because of missing suitable binding for the addition")
 		}
-		if err := fs.CopyAddition(addition, destination); err != nil {
+		destination = path.Join(cfg.Context.String(), destination)
+		if err := fs.Copy(addition, destination); err != nil {
 			return fmt.Errorf("could not copy addition to '%v' (%v)", destination, err)
 		}
+		output.Plus.Printf("copied '%v' to '%v' (in '%v')", destination, cfg.Context)
 	}
 	return nil
 }
