@@ -7,7 +7,6 @@ import (
 	"github.com/urfave/cli/v2"
 	"os"
 	"path"
-	"strings"
 )
 
 func Remove(ctx *cli.Context) error {
@@ -30,7 +29,6 @@ func Remove(ctx *cli.Context) error {
 		// don't need it
 	} else { // path to destination is provided
 		var resolved bool
-		addition = strings.TrimLeft(addition, cfg.Context.String()+"/")
 		additionSourcePath, resolved = cfg.ResolveAdditionSource(addition)
 		if !resolved {
 			return fmt.Errorf("could not resolve source of '%v'", addition)

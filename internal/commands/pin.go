@@ -6,7 +6,6 @@ import (
 	"github.com/jieggii/dcfg/internal/output"
 	"github.com/urfave/cli/v2"
 	"path"
-	"strings"
 )
 
 func Pin(ctx *cli.Context) error {
@@ -24,11 +23,6 @@ func Pin(ctx *cli.Context) error {
 		return fmt.Errorf("path to folder to pin must be relative (got absolute path '%v')", pinned)
 	}
 
-	if strings.HasPrefix(pinned, cfg.Context.String()) {
-		// remove "$(cfg.Context)/" prefix from path to pinned object
-		pinned = strings.TrimLeft(pinned, cfg.Context.String()+"/")
-	}
-
 	if remove {
 		if err := cfg.Pinned.Remove(pinned); err != nil {
 			return err
@@ -36,7 +30,7 @@ func Pin(ctx *cli.Context) error {
 		if err = cfg.DumpToFile(cfgPath); err != nil {
 			return err
 		}
-		output.Minus.Printf("unpinned %v (in '%v').\n", pinned, cfg.Context.String())
+		output.Minus.Printf("unpinned %v.\n", pinned)
 
 	} else {
 		if err = cfg.Pinned.Append(pinned); err != nil {
@@ -45,7 +39,7 @@ func Pin(ctx *cli.Context) error {
 		if err = cfg.DumpToFile(cfgPath); err != nil {
 			return err
 		}
-		output.Plus.Printf("pinned %v (in '%v').\n", pinned, cfg.Context.String())
+		output.Plus.Printf("pinned %v .\n", pinned)
 	}
 
 	return nil

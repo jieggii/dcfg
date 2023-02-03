@@ -11,8 +11,6 @@ import (
 const configFilePermission = 0644
 
 type Config struct {
-	Context Context `json:"context"` // path to context directory
-
 	Bindings  Bindings  `json:"bindings"`  // path-to-path bindings
 	Additions Additions `json:"additions"` // paths to additions
 	Pinned    Pinned    `json:"pins"`      // paths to pinned objects
@@ -45,10 +43,9 @@ func (c *Config) ResolveAdditionSource(additionDestination string) (string, bool
 	return "", false
 }
 
-// todo
-func (c *Config) Validate() []error {
-	return nil
-}
+//func (c *Config) Validate() []error {
+//	return nil
+//}
 
 func (c *Config) DumpToFile(path string) error {
 	data, err := json.MarshalIndent(c, "", " ")
@@ -64,7 +61,6 @@ func (c *Config) DumpToFile(path string) error {
 
 func NewConfig() *Config {
 	return &Config{
-		Context:   ".",
 		Bindings:  Bindings{},
 		Additions: Additions{},
 		Pinned:    Pinned{},

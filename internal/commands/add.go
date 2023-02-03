@@ -35,11 +35,10 @@ func Add(ctx *cli.Context) error {
 		if !resolved {
 			return errors.New("didn't collect because of missing suitable binding for the addition")
 		}
-		destination = path.Join(cfg.Context.String(), destination)
 		if err := fs.Copy(addition, destination); err != nil {
 			return fmt.Errorf("could not copy addition to '%v' (%v)", destination, err)
 		}
-		output.Plus.Printf("copied '%v' to '%v' (in '%v')", destination, cfg.Context)
+		output.Plus.Printf("copied '%v' to '%v'", destination)
 	}
 	return nil
 }

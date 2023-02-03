@@ -4,7 +4,6 @@ import (
 	"github.com/jieggii/dcfg/internal/config"
 	"github.com/jieggii/dcfg/internal/output"
 	"github.com/urfave/cli/v2"
-	"path"
 	"strconv"
 )
 
@@ -17,10 +16,6 @@ func Status(ctx *cli.Context) error {
 	}
 	// config file
 	output.Stdout.Printf("dcfg config: '%v'\n", cfgPath)
-
-	// context directory
-	output.Stdout.Printf("context directory: '%v'\n", cfg.Context)
-	output.Stdout.Println()
 
 	// bindings
 	output.Stdout.Println("bindings:")
@@ -45,7 +40,6 @@ func Status(ctx *cli.Context) error {
 			if !resolved {
 				destination = "[MISSING SUITABLE BINDING]"
 			}
-			destination = path.Join(cfg.Context.String(), destination)
 
 			var collectedString string
 			collected, err := cfg.Additions.IsCollected(destination)

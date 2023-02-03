@@ -5,7 +5,6 @@ import (
 	"github.com/jieggii/dcfg/internal/fs"
 	"github.com/jieggii/dcfg/internal/output"
 	"github.com/urfave/cli/v2"
-	"path"
 )
 
 func Collect(ctx *cli.Context) error {
@@ -22,7 +21,6 @@ func Collect(ctx *cli.Context) error {
 			output.Warning.Printf("not resolved %v\n", destination)
 			continue
 		}
-		destination = path.Join(cfg.Context.String(), destination)
 		if err := fs.Copy(addition, destination); err != nil {
 			output.Warning.Printf("could not copy %v to %v (%v)\n", addition, destination, err)
 			continue
