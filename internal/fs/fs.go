@@ -17,7 +17,7 @@ func Copy(addition string, destination string) error {
 	return cp.Copy(addition, destination, options)
 }
 
-func DirectoryExists(path string) (bool, error) {
+func NodeExists(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {

@@ -18,9 +18,15 @@ func Add(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
 	addition := path.Clean(ctx.Args().First())
 	if !path.IsAbs(addition) {
 		return fmt.Errorf("path to addition must be absolute (got relative path '%v')", addition)
+	}
+
+	destination, resolved := cfg.ResolveAdditionDestination(addition)
+	if !resolved {
+		return errors.New("could not resolve addition destination (missing suitable binding)")
 	}
 	if err := cfg.Additions.Append(addition); err != nil {
 		return err
@@ -28,17 +34,16 @@ func Add(ctx *cli.Context) error {
 	if err := cfg.DumpToFile(cfgPath); err != nil {
 		return err
 	}
-	output.Plus.Printf("appended new addition %v.", addition)
+	output.Plus.Printf(
+		"appended new addition '%v' (will be copied to '%v' when collecting).\n",
+		addition, destination,
+	)
 
 	if collect {
-		destination, resolved := cfg.ResolveAdditionDestination(addition)
-		if !resolved {
-			return errors.New("didn't collect because of missing suitable binding for the addition")
-		}
 		if err := fs.Copy(addition, destination); err != nil {
-			return fmt.Errorf("could not copy addition to '%v' (%v)", destination, err)
+			return fmt.Errorf("could not copy '%v' to '%v' (%v)", addition, destination, err)
 		}
-		output.Plus.Printf("copied '%v' to '%v'", destination)
+		output.Plus.Printf("copied '%v' to '%v'", addition, destination)
 	}
 	return nil
 }

@@ -15,7 +15,7 @@ func Status(ctx *cli.Context) error {
 		return err
 	}
 	// config file
-	output.Stdout.Printf("dcfg config: '%v'\n", cfgPath)
+	output.Stdout.Printf("dcfg config file: '%v'\n", cfgPath)
 
 	// bindings
 	output.Stdout.Println("bindings:")
@@ -35,6 +35,7 @@ func Status(ctx *cli.Context) error {
 	// additions
 	output.Stdout.Println("additions:")
 	if cfg.Additions.IsPresent() {
+		longestAdditionLenString := strconv.Itoa(cfg.Additions.LongestPathLen)
 		for _, addition := range cfg.Additions.Paths {
 			destination, resolved := cfg.ResolveAdditionDestination(addition)
 			if !resolved {
@@ -52,14 +53,14 @@ func Status(ctx *cli.Context) error {
 			} else {
 				collectedString = "NOT COLLECTED"
 			}
-			output.Stdout.Printf(" - %-"+strconv.Itoa(cfg.Additions.LongestPathLen)+"v -> %v [%v]", addition, destination, collectedString)
+			output.Stdout.Printf(" - %-"+longestAdditionLenString+"v -> %v [%v]", addition, destination, collectedString)
 		}
 	} else {
 		output.Stdout.Println(" * no additions yet *")
 	}
 
 	output.Stdout.Println()
-	output.Stdout.Println("pinned directories and files:")
+	output.Stdout.Println("pinned objects:")
 	if cfg.Pinned.IsPresent() {
 		for _, pinned := range cfg.Pinned {
 			output.Stdout.Printf(" - %v\n", pinned)

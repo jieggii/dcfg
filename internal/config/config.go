@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jieggii/dcfg/internal/fs"
 	"io"
 	"os"
 	"strings"
@@ -33,7 +34,6 @@ func (c *Config) ResolveAdditionDestination(addition string) (string, bool) {
 func (c *Config) ResolveAdditionSource(additionDestination string) (string, bool) {
 	for _, addition := range c.Additions.Paths {
 		destination, resolved := c.ResolveAdditionDestination(addition)
-		fmt.Println(destination)
 		if resolved {
 			if destination == additionDestination {
 				return addition, true
@@ -68,11 +68,19 @@ func NewConfig() *Config {
 }
 
 func NewConfigFromFile(path string) (*Config, error) {
+	exists, err := fs.NodeExists(path)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		return nil, fmt.Errorf("dcfg config file '%v' does not exist", path)
+	}
+
 	cfg := NewConfig()
 
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("could not open config %v (%v)", path, err)
+		return nil, fmt.Errorf("could not open config file '%v' (%v)", path, err)
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
@@ -82,12 +90,12 @@ func NewConfigFromFile(path string) (*Config, error) {
 
 	data, err := io.ReadAll(file)
 	if err != nil {
-		return nil, fmt.Errorf("could not read config %v (%v)", path, err)
+		return nil, fmt.Errorf("could not read config file '%v' (%v)", path, err)
 	}
 
 	err = json.Unmarshal(data, cfg)
 	if err != nil {
-		return nil, fmt.Errorf("could not parse config %v (%v)", path, err)
+		return nil, fmt.Errorf("could not parse config file '%v' (%v)", path, err)
 	}
 	return cfg, nil
 }

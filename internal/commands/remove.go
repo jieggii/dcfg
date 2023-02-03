@@ -25,8 +25,8 @@ func Remove(ctx *cli.Context) error {
 	if path.IsAbs(addition) { // addition source is provided
 		additionSourcePath = addition
 		additionDestinationPath, _ = cfg.ResolveAdditionDestination(addition)
-		// don't check if addition destination path is resolved 'cause we
-		// don't need it
+		// don't check if addition destination path is resolved 'cause this
+		// is not needed to be done
 	} else { // path to destination is provided
 		var resolved bool
 		additionSourcePath, resolved = cfg.ResolveAdditionSource(addition)
@@ -41,7 +41,7 @@ func Remove(ctx *cli.Context) error {
 	if err := cfg.DumpToFile(cfgPath); err != nil {
 		return err
 	}
-	output.Minus.Printf("removed addition '%v' from additions list.", additionSourcePath)
+	output.Minus.Printf("removed '%v' from additions list.", additionSourcePath)
 	if !soft && additionDestinationPath != "" {
 		err := os.RemoveAll(additionDestinationPath)
 		if err != nil {

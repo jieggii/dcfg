@@ -16,11 +16,12 @@ func Pin(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
 	args := ctx.Args()
-	pinned := path.Clean(args.Get(0))
+	pinned := path.Clean(args.First())
 
 	if path.IsAbs(pinned) {
-		return fmt.Errorf("path to folder to pin must be relative (got absolute path '%v')", pinned)
+		return fmt.Errorf("path to object to be pinned must be relative (got absolute path '%v')", pinned)
 	}
 
 	if remove {
@@ -31,7 +32,6 @@ func Pin(ctx *cli.Context) error {
 			return err
 		}
 		output.Minus.Printf("unpinned %v.\n", pinned)
-
 	} else {
 		if err = cfg.Pinned.Append(pinned); err != nil {
 			return err
@@ -41,6 +41,9 @@ func Pin(ctx *cli.Context) error {
 		}
 		output.Plus.Printf("pinned %v .\n", pinned)
 	}
+	// cfg.DumpToFile is called inside both codeblocks and not after them
+	// because error must be returned even in case if cfg.Pinned.Append or
+	// cfg.Pinned.Remove succeeded, but cfg.DumpToFile failed
 
 	return nil
 }

@@ -42,7 +42,7 @@ func Bind(ctx *cli.Context) error {
 
 	} else {
 		if argsCount != 2 {
-			return fmt.Errorf("bind command takes exactly 2 arguments (got %v).\nusage: %v", argsCount, ctx.Command.UsageText)
+			return fmt.Errorf("bind command without '--remove' flag takes exactly 2 arguments (got %v).\nusage: %v", argsCount, ctx.Command.UsageText)
 		}
 		destination := path.Clean(args.Get(1))
 		if path.IsAbs(destination) {
@@ -54,7 +54,7 @@ func Bind(ctx *cli.Context) error {
 		if err = cfg.DumpToFile(cfgPath); err != nil {
 			return err
 		}
-		output.Plus.Printf("added new binding: %v -> %v.\n", source, destination)
+		output.Plus.Printf("registered new binding: %v -> %v.\n", source, destination)
 	}
 
 	return nil

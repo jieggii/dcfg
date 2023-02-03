@@ -58,9 +58,9 @@ func NewApp() *cli.App {
 			{
 				Name:        "bind",
 				Aliases:     []string{"b"},
-				Usage:       "append or remove binding",
+				Usage:       "register or remove binding",
 				UsageText:   "dcfg [--config PATH] bind [--remove] <source> [destination]",
-				Description: "appends or removes absolute-to-relative path binding",
+				Description: "registers or removes absolute-to-relative path binding",
 				Action:      intervalArgsCountMiddleware(1, 2, commands.Bind),
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
@@ -78,7 +78,7 @@ func NewApp() *cli.App {
 				Aliases:     []string{"a"},
 				Usage:       "append addition",
 				UsageText:   "dcfg [--config] add <PATH>",
-				Description: "registers new addition",
+				Description: "appends new addition",
 				Action:      explicitArgsCountMiddleware(1, commands.Add),
 				Flags: []cli.Flag{
 					&cli.BoolFlag{

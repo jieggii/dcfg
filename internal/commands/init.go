@@ -11,13 +11,13 @@ import (
 func Init(ctx *cli.Context) error {
 	cfgPath := ctx.String("config")
 	if _, err := os.Stat(cfgPath); err == nil { // check if file cfgPath already exists
-		return fmt.Errorf("'%v' already exists", cfgPath)
+		return fmt.Errorf("dcfg config file '%v' already exists", cfgPath)
 	}
 
 	cfg := config.NewConfig()
 	if err := cfg.DumpToFile(cfgPath); err != nil {
 		return err
 	}
-	output.Plus.Printf("created dcfg config '%v'.\n", cfgPath)
+	output.Plus.Printf("created dcfg config file '%v'.\n", cfgPath)
 	return nil
 }

@@ -49,7 +49,7 @@ func (a *Additions) Append(path string) error {
 func (a *Additions) Remove(path string) error {
 	i := itemIndex(a.Paths, path)
 	if i == -1 {
-		return fmt.Errorf("path '%v' is not registered as addition", path)
+		return fmt.Errorf("'%v' is not registered as addition", path)
 	}
 	a.Paths = removeItem(a.Paths, i)
 	return nil
@@ -64,7 +64,7 @@ func (a *Additions) IsPresent() bool {
 }
 
 func (a *Additions) IsCollected(destination string) (bool, error) {
-	collected, err := fs.DirectoryExists(destination)
+	collected, err := fs.NodeExists(destination)
 	if err != nil {
 		return false, fmt.Errorf("could not check if '%v' exists (%v)", destination, err)
 	}
