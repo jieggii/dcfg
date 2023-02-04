@@ -3,6 +3,8 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jieggii/dcfg/internal/util"
+	"strings"
 )
 
 const bindingWithSourceDoesNotExistErrorText = "binding with source '%v' does not exist"
@@ -66,12 +68,12 @@ func (b *Bindings) Append(source string, destination string) error {
 }
 
 func (b *Bindings) Remove(source string) error {
-	i := itemIndex(b.Sources, source)
+	i := util.ItemIndex(b.Sources, source)
 	if i == -1 {
 		return fmt.Errorf(bindingWithSourceDoesNotExistErrorText, source)
 	}
-	b.Sources = removeItem(b.Sources, i)
-	b.Destinations = removeItem(b.Destinations, i)
+	b.Sources = util.RemoveItem(b.Sources, i)
+	b.Destinations = util.RemoveItem(b.Destinations, i)
 	return nil
 }
 
@@ -85,11 +87,20 @@ func (b *Bindings) ResolveDestination(source string) (string, error) {
 }
 
 func (b *Bindings) SourceExists(path string) bool {
-	return itemIsInArray(b.Sources, path)
+	return util.ItemIsInArray(b.Sources, path)
 }
 
 func (b *Bindings) DestinationExists(path string) bool {
-	return itemIsInArray(b.Destinations, path)
+	return util.ItemIsInArray(b.Destinations, path)
+}
+
+func (b *Bindings) DestinationWithPrefixExists(prefix string) bool {
+	for _, destination := range b.Destinations {
+		if strings.HasPrefix(destination, prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 func (b *Bindings) IsPresent() bool {

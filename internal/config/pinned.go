@@ -1,28 +1,31 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/jieggii/dcfg/internal/util"
+)
 
 type Pinned []string
 
 func (p *Pinned) Append(path string) error {
 	if p.Exists(path) {
-		return fmt.Errorf("path '%v' is already pinned", path)
+		return fmt.Errorf("'%v' is already pinned", path)
 	}
 	*p = append(*p, path)
 	return nil
 }
 
 func (p *Pinned) Remove(path string) error {
-	i := itemIndex(*p, path)
+	i := util.ItemIndex(*p, path)
 	if i == -1 {
-		return fmt.Errorf("path '%v' is not pinned", path)
+		return fmt.Errorf("'%v' is not pinned", path)
 	}
-	*p = removeItem(*p, i)
+	*p = util.RemoveItem(*p, i)
 	return nil
 }
 
 func (p *Pinned) Exists(path string) bool {
-	return itemIsInArray(*p, path)
+	return util.ItemIsInArray(*p, path)
 }
 
 func (p *Pinned) IsPresent() bool {

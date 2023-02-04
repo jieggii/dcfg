@@ -31,6 +31,12 @@ func NewApp() *cli.App {
 				Value:   defaultConfigFilename,
 				Aliases: []string{"c"},
 			},
+			&cli.BoolFlag{
+				Name:    "verbose",
+				Usage:   "enable verbose output",
+				Value:   false,
+				Aliases: []string{"V"},
+			},
 		},
 		Commands: []*cli.Command{
 			// service
@@ -133,6 +139,24 @@ func NewApp() *cli.App {
 						Usage:   "do not remove collected objects from context directory",
 						Value:   false,
 						Aliases: []string{"s"},
+					},
+				},
+				OnUsageError: handleUsageError,
+				Category:     filesystemOperationsCategory,
+			},
+			{
+				Name:        "clean",
+				Aliases:     []string{"cl"},
+				Usage:       "dcfg [--config] clean",
+				UsageText:   "remove extra objects",
+				Description: "removes everything except collected additions, pinned objects, '.git' directory and dcfg config file",
+				Action:      commands.Clean,
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:    "yes",
+						Usage:   "confirm cleaning",
+						Value:   false,
+						Aliases: []string{"y"},
 					},
 				},
 				OnUsageError: handleUsageError,

@@ -31,7 +31,7 @@ func Pin(ctx *cli.Context) error {
 		if err = cfg.DumpToFile(cfgPath); err != nil {
 			return err
 		}
-		output.Minus.Printf("unpinned %v.\n", pinned)
+		output.Minus.Printf("unpinned '%v'\n", pinned)
 	} else {
 		if err = cfg.Pinned.Append(pinned); err != nil {
 			return err
@@ -39,7 +39,7 @@ func Pin(ctx *cli.Context) error {
 		if err = cfg.DumpToFile(cfgPath); err != nil {
 			return err
 		}
-		output.Plus.Printf("pinned %v .\n", pinned)
+		output.Plus.Printf("pinned '%v'\n", pinned)
 	}
 	// cfg.DumpToFile is called inside both codeblocks and not after them
 	// because error must be returned even in case if cfg.Pinned.Append or

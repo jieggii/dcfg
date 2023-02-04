@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/jieggii/dcfg/internal/fs"
+	"github.com/jieggii/dcfg/internal/util"
 )
 
 type Additions struct {
@@ -47,16 +48,16 @@ func (a *Additions) Append(path string) error {
 }
 
 func (a *Additions) Remove(path string) error {
-	i := itemIndex(a.Paths, path)
+	i := util.ItemIndex(a.Paths, path)
 	if i == -1 {
 		return fmt.Errorf("'%v' is not registered as addition", path)
 	}
-	a.Paths = removeItem(a.Paths, i)
+	a.Paths = util.RemoveItem(a.Paths, i)
 	return nil
 }
 
 func (a *Additions) Exists(path string) bool {
-	return itemIsInArray(a.Paths, path)
+	return util.ItemIsInArray(a.Paths, path)
 }
 
 func (a *Additions) IsPresent() bool {
