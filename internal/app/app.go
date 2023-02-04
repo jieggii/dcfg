@@ -21,7 +21,7 @@ func NewApp() *cli.App {
 	return &cli.App{
 		Name:        "dcfg",
 		Usage:       "distribute config",
-		UsageText:   "dcfg [--config PATH] <command> [command options]",
+		UsageText:   "dcfg [--help] [--version] [--verbose] [--config PATH] <command> [command options]",
 		Version:     version,
 		Description: "Minimalist tool for copying, storing and distributing your system-wide and user config files.",
 		Flags: []cli.Flag{
@@ -83,7 +83,7 @@ func NewApp() *cli.App {
 				Name:        "add",
 				Aliases:     []string{"a"},
 				Usage:       "append addition",
-				UsageText:   "dcfg [--config] add <PATH>",
+				UsageText:   "dcfg [--verbose] [--config] add <PATH>",
 				Description: "appends new addition",
 				Action:      explicitArgsCountMiddleware(1, commands.Add),
 				Flags: []cli.Flag{
@@ -147,8 +147,8 @@ func NewApp() *cli.App {
 			{
 				Name:        "clean",
 				Aliases:     []string{"cl"},
-				Usage:       "dcfg [--config] clean",
-				UsageText:   "remove extra objects",
+				Usage:       "clean",
+				UsageText:   "dcfg [--verbose] [--config] clean",
 				Description: "removes everything except collected additions, pinned objects, '.git' directory and dcfg config file",
 				Action:      commands.Clean,
 				Flags: []cli.Flag{

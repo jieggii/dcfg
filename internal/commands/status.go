@@ -38,22 +38,23 @@ func Status(ctx *cli.Context) error {
 		longestAdditionLenString := strconv.Itoa(cfg.Additions.LongestPathLen)
 		for _, addition := range cfg.Additions.Paths {
 			destination, resolved := cfg.ResolveAdditionDestination(addition)
-			if !resolved {
+
+			var collectedIndicator string
+			if resolved { // if destination was resolved
+				collected, err := cfg.Additions.IsCollected(destination)
+				if collected { // addition is collected
+					collectedIndicator = "+"
+				} else if !collected && err == nil { // addition is not collected
+					collectedIndicator = "-"
+				} else { // could not check if addition is collected
+					collectedIndicator = "?"
+					output.Warning.Println(err)
+				}
+			} else { // destination was not resolved (missing suitable binding)
+				collectedIndicator = "!"
 				destination = "[MISSING SUITABLE BINDING]"
 			}
-
-			var collectedString string
-			collected, err := cfg.Additions.IsCollected(destination)
-			if err != nil {
-				collectedString = "???"
-				output.Warning.Println(err)
-			}
-			if collected {
-				collectedString = "COLLECTED"
-			} else {
-				collectedString = "NOT COLLECTED"
-			}
-			output.Stdout.Printf(" - %-"+longestAdditionLenString+"v -> %v [%v]", addition, destination, collectedString)
+			output.Stdout.Printf(" %v %-"+longestAdditionLenString+"v -> %v", collectedIndicator, addition, destination)
 		}
 	} else {
 		output.Stdout.Println(" * no additions yet *")

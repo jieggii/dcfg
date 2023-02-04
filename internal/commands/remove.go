@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"github.com/jieggii/dcfg/internal/config"
+	"github.com/jieggii/dcfg/internal/fs"
 	"github.com/jieggii/dcfg/internal/output"
 	"github.com/urfave/cli/v2"
 	"os"
@@ -42,7 +43,13 @@ func Remove(ctx *cli.Context) error {
 		return err
 	}
 	output.Minus.Printf("removed '%v' from additions list", additionSourcePath)
-	if !soft && additionDestinationPath != "" {
+
+	additionDestinationExists, err := fs.NodeExists(additionDestinationPath)
+	if err != nil {
+		output.Warning.Println(err)
+	}
+
+	if !soft && additionDestinationExists {
 		err := os.RemoveAll(additionDestinationPath)
 		if err != nil {
 			return err
