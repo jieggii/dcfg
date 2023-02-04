@@ -29,25 +29,25 @@ func Clean(ctx *cli.Context) error {
 
 	var deletions []string
 	ignoredByDefault = append(ignoredByDefault, cfgPath)
-	
+
 	for _, node := range nodes {
 		name := node.Name()
 
 		if util.ItemIsInArray(ignoredByDefault, name) { // if node is ignored by default
 			if verbose {
-				output.Verbose.Printf("ignoring '%v' because it is ignored by default.\n", name)
+				output.Verbose.Printf("ignoring '%v' because it is ignored by default\n", name)
 			}
 			continue
 		}
 		if cfg.Pinned.Exists(name) { // if node is pinned
 			if verbose {
-				output.Verbose.Printf("ignoring '%v' because it is pinned.\n", name)
+				output.Verbose.Printf("ignoring '%v' because it is pinned\n", name)
 			}
 			continue
 		}
 		if cfg.Bindings.DestinationWithPrefixExists(name) { // if node is binding destination
 			if verbose {
-				output.Verbose.Printf("ignoring '%v' because it is binding destination.\n", name)
+				output.Verbose.Printf("ignoring '%v' because it is binding destination\n", name)
 			}
 			continue
 		}

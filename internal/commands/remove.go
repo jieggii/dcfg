@@ -41,13 +41,13 @@ func Remove(ctx *cli.Context) error {
 	if err := cfg.DumpToFile(cfgPath); err != nil {
 		return err
 	}
-	output.Minus.Printf("removed '%v' from additions list.", additionSourcePath)
+	output.Minus.Printf("removed '%v' from additions list", additionSourcePath)
 	if !soft && additionDestinationPath != "" {
 		err := os.RemoveAll(additionDestinationPath)
 		if err != nil {
 			return err
 		}
-		output.Minus.Printf("removed '%v'.", additionDestinationPath)
+		output.Minus.Printf("removed '%v'", additionDestinationPath)
 	}
 	return nil
 }

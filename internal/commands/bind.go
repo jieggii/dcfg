@@ -38,7 +38,7 @@ func Bind(ctx *cli.Context) error {
 		if err = cfg.DumpToFile(cfgPath); err != nil {
 			return err
 		}
-		output.Minus.Printf("removed binding: %v -> %v.\n", source, destination)
+		output.Minus.Printf("removed binding: %v -> %v\n", source, destination)
 
 	} else {
 		if argsCount != 2 {
@@ -54,7 +54,7 @@ func Bind(ctx *cli.Context) error {
 		if err = cfg.DumpToFile(cfgPath); err != nil {
 			return err
 		}
-		output.Plus.Printf("registered new binding: %v -> %v.\n", source, destination)
+		output.Plus.Printf("registered new binding: %v -> %v\n", source, destination)
 	}
 
 	return nil

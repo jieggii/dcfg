@@ -13,7 +13,7 @@ func intervalArgsCountMiddleware(minArgsCount int, maxArgsCount int, action cli.
 			return action(ctx)
 		} else {
 			return fmt.Errorf(
-				"%v command takes from %v to %v arguments, got %v.\nusage: %v",
+				"%v command takes from %v to %v arguments, got %v\nusage: %v",
 				ctx.Command.Name, minArgsCount, maxArgsCount, argsCount, ctx.Command.UsageText,
 			)
 		}
@@ -28,12 +28,12 @@ func explicitArgsCountMiddleware(expectedArgsCount int, action cli.ActionFunc) c
 		} else {
 			if expectedArgsCount == 0 {
 				return fmt.Errorf(
-					"%v command takes no arguments, got %v.\nusage: %v",
+					"%v command takes no arguments, got %v\nusage: %v",
 					ctx.Command.Name, args.Len(), ctx.Command.UsageText,
 				)
 			} else {
 				return fmt.Errorf(
-					"%v command takes exactly %v argument(s), got %v.\nusage: %v",
+					"%v command takes exactly %v argument(s), got %v\nusage: %v",
 					ctx.Command.Name, expectedArgsCount, args.Len(), ctx.Command.UsageText,
 				)
 			}
