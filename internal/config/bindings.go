@@ -103,6 +103,6 @@ func (b *Bindings) DestinationWithPrefixExists(prefix string) bool {
 	return false
 }
 
-func (b *Bindings) IsPresent() bool {
+func (b *Bindings) Any() bool {
 	return len(b.Sources) != 0
 }

@@ -21,11 +21,17 @@ func Collect(ctx *cli.Context) error {
 
 		destination, resolved := cfg.ResolveAdditionDestination(addition)
 		if !resolved {
-			output.Warning.Printf("%-"+minAdditionLenStr+"v  : could not resolve addition destination (missing suitable binding)\n", addition)
+			output.Warning.Printf(
+				"%-"+minAdditionLenStr+"v  : could not resolve addition destination (missing suitable binding)\n",
+				addition,
+			)
 			continue
 		}
 		if err := fs.Copy(addition, destination); err != nil {
-			output.Warning.Printf("%-"+minAdditionLenStr+"v  : could not copy '%v' to '%v' (%v)\n", addition, addition, destination, err)
+			output.Warning.Printf(
+				"%-"+minAdditionLenStr+"v  : could not copy '%v' to '%v' (%v)\n",
+				addition, addition, destination, err,
+			)
 			continue
 		}
 		output.Plus.Printf("%-"+minAdditionLenStr+"v -> %v\n", addition, destination)

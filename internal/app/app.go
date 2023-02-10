@@ -13,9 +13,9 @@ const version = "0.2.0"
 const defaultConfigFilename = "dcfg.json"
 
 // categories
-const filesystemOperationsCategory = "\n  FILESYSTEM OPERATIONS"
-const serviceCategory = "\n  SERVICE"
-const metadataManagementCategory = "\n  METADATA MANAGEMENT"
+const serviceCategory = "SERVICE"
+const metadataManagementCategory = "METADATA MANAGEMENT"
+const filesystemOperationsCategory = "FILESYSTEM OPERATIONS"
 
 func NewApp() *cli.App {
 	return &cli.App{

@@ -60,7 +60,7 @@ func (a *Additions) Exists(path string) bool {
 	return util.ItemIsInArray(a.Paths, path)
 }
 
-func (a *Additions) IsPresent() bool {
+func (a *Additions) Any() bool {
 	return len(a.Paths) != 0
 }
 

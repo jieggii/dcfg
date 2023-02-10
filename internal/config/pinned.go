@@ -28,6 +28,6 @@ func (p *Pinned) Exists(path string) bool {
 	return util.ItemIsInArray(*p, path)
 }
 
-func (p *Pinned) IsPresent() bool {
+func (p *Pinned) Any() bool {
 	return len(*p) != 0
 }

@@ -19,7 +19,7 @@ func Status(ctx *cli.Context) error {
 
 	// bindings
 	output.Stdout.Println("bindings:")
-	if cfg.Bindings.IsPresent() {
+	if cfg.Bindings.Any() {
 		for i, source := range cfg.Bindings.Sources {
 			destination, err := cfg.Bindings.ResolveDestination(source)
 			if err != nil {
@@ -34,7 +34,7 @@ func Status(ctx *cli.Context) error {
 
 	// additions
 	output.Stdout.Println("additions:")
-	if cfg.Additions.IsPresent() {
+	if cfg.Additions.Any() {
 		longestAdditionLenString := strconv.Itoa(cfg.Additions.LongestPathLen)
 		for _, addition := range cfg.Additions.Paths {
 			destination, resolved := cfg.ResolveAdditionDestination(addition)
@@ -62,7 +62,7 @@ func Status(ctx *cli.Context) error {
 
 	output.Stdout.Println()
 	output.Stdout.Println("pinned objects:")
-	if cfg.Pinned.IsPresent() {
+	if cfg.Pinned.Any() {
 		for _, pinned := range cfg.Pinned {
 			output.Stdout.Printf(" - %v\n", pinned)
 		}

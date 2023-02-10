@@ -58,13 +58,13 @@ func Clean(ctx *cli.Context) error {
 		return nil
 	}
 
-	output.Stdout.Printf("Nodes to be deleted:")
+	output.Stdout.Printf("nodes to be deleted:")
 	for _, path := range deletions {
 		output.Stdout.Printf("- '%v'\n", path)
 	}
 	if !confirmation {
 		output.Stdout.Println()
-		confirmation, err = input.ConfirmationPrompt("Proceed with deletions?")
+		confirmation, err = input.ConfirmationPrompt("proceed with deletions?")
 		if err != nil {
 			return err
 		}
