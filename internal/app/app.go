@@ -117,12 +117,36 @@ func NewApp() *cli.App {
 			},
 			// filesystem operations
 			{
-				Name:         "collect",
-				Aliases:      []string{"c"},
-				Usage:        "collect additions",
-				UsageText:    "dcfg [--config] collect",
-				Description:  "copies all registered additions to context directory according to bindings",
-				Action:       explicitArgsCountMiddleware(0, commands.Collect),
+				Name:        "collect",
+				Aliases:     []string{"c"},
+				Usage:       "collect additions",
+				UsageText:   "dcfg [--config] collect",
+				Description: "copies all registered additions to context directory according to bindings",
+				Action:      explicitArgsCountMiddleware(0, commands.Collect),
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "hard",
+						Value: false,
+						Usage: "copy and overwrite files without asking any permission",
+					},
+				},
+				OnUsageError: handleUsageError,
+				Category:     filesystemOperationsCategory,
+			},
+			{
+				Name:        "extract",
+				Aliases:     []string{"e"},
+				Usage:       "extract collected additions",
+				UsageText:   "dcfg [--config] extract",
+				Description: "copies all collected additions to their destinations",
+				Action:      explicitArgsCountMiddleware(0, commands.Extract),
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "no-diff",
+						Value: false,
+						Usage: "do not show diff(s)",
+					},
+				},
 				OnUsageError: handleUsageError,
 				Category:     filesystemOperationsCategory,
 			},
