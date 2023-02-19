@@ -18,23 +18,22 @@ func Collect(ctx *cli.Context) error {
 
 	minAdditionLenStr := strconv.Itoa(cfg.Additions.LongestPathLen)
 	for _, addition := range cfg.Additions.Paths {
-
 		destination, resolved := cfg.ResolveAdditionDestination(addition)
 		if !resolved {
 			output.Warning.Printf(
-				"%-"+minAdditionLenStr+"v  : could not resolve addition destination (missing suitable binding)\n",
+				"%-"+minAdditionLenStr+"v  : could not resolve addition destination (missing suitable binding)",
 				addition,
 			)
 			continue
 		}
 		if err := fs.Copy(addition, destination); err != nil {
 			output.Warning.Printf(
-				"%-"+minAdditionLenStr+"v  : could not copy '%v' to '%v' (%v)\n",
+				"%-"+minAdditionLenStr+"v  : could not copy '%v' to '%v' (%v)",
 				addition, addition, destination, err,
 			)
 			continue
 		}
-		output.Plus.Printf("%-"+minAdditionLenStr+"v -> %v\n", addition, destination)
+		output.Plus.Printf("%-"+minAdditionLenStr+"v -> %v", addition, destination)
 	}
 	return nil
 }

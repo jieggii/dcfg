@@ -6,11 +6,12 @@ import (
 	"os"
 )
 
-// program metadata
+// dcfg metadata
 const version = "0.2.0"
 
 // defaults
 const defaultConfigFilename = "dcfg.json"
+const defaultDiffBinPath = "/usr/bin/diff"
 
 // categories
 const serviceCategory = "SERVICE"
@@ -25,7 +26,7 @@ func NewApp() *cli.App {
 		Version:     version,
 		Description: "Minimalist tool for copying, storing and distributing your system-wide and user config files.",
 		Flags: []cli.Flag{
-			&cli.StringFlag{
+			&cli.StringFlag{ // todo: test with cli.PathFlag
 				Name:    "config",
 				Usage:   "dcfg config file `PATH`",
 				Value:   defaultConfigFilename,
@@ -83,9 +84,9 @@ func NewApp() *cli.App {
 				Name:        "add",
 				Aliases:     []string{"a"},
 				Usage:       "append addition",
-				UsageText:   "dcfg [--verbose] [--config] add <PATH>",
+				UsageText:   "dcfg [--verbose] [--config] add <PATH1> ...",
 				Description: "appends new addition",
-				Action:      explicitArgsCountMiddleware(1, commands.Add),
+				Action:      moreThanArgsCountMiddleware(1, commands.Add),
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:    "collect",
@@ -101,9 +102,9 @@ func NewApp() *cli.App {
 				Name:        "pin",
 				Aliases:     []string{"p"},
 				Usage:       "pin or unpin object",
-				UsageText:   "dcfg [--config] pin [--remove] <PATH>",
+				UsageText:   "dcfg [--config] pin [--remove] <PATH1> ...",
 				Description: "pins or unpins file or directory inside context directory",
-				Action:      explicitArgsCountMiddleware(1, commands.Pin),
+				Action:      moreThanArgsCountMiddleware(1, commands.Pin),
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:    "remove",
@@ -137,7 +138,7 @@ func NewApp() *cli.App {
 				Name:        "extract",
 				Aliases:     []string{"e"},
 				Usage:       "extract collected additions",
-				UsageText:   "dcfg [--config] extract",
+				UsageText:   "dcfg [--config] extract [--hard] [--no-diff] [--overwrite-source-prefix oldPrefix:newPrefix]",
 				Description: "copies all collected additions to their destinations",
 				Action:      explicitArgsCountMiddleware(0, commands.Extract),
 				Flags: []cli.Flag{
@@ -145,6 +146,21 @@ func NewApp() *cli.App {
 						Name:  "no-diff",
 						Value: false,
 						Usage: "do not show diff(s)",
+					},
+					&cli.BoolFlag{
+						Name:  "hard",
+						Value: false,
+						Usage: "disable confirmation prompts before performing operations (dangerous)",
+					},
+					&cli.StringSliceFlag{
+						Name:    "overwrite-source-prefix",
+						Aliases: []string{"o"},
+						Usage:   "overwrite source prefix",
+					},
+					&cli.StringFlag{
+						Name:   "diff-bin-path",
+						Hidden: true,
+						Value:  defaultDiffBinPath,
 					},
 				},
 				OnUsageError: handleUsageError,
@@ -154,9 +170,9 @@ func NewApp() *cli.App {
 				Name:        "remove",
 				Aliases:     []string{"rm"},
 				Usage:       "remove addition",
-				UsageText:   "dcfg [--config] remove <PATH>",
+				UsageText:   "dcfg [--config] remove <PATH1> ...",
 				Description: "removes addition",
-				Action:      explicitArgsCountMiddleware(1, commands.Remove),
+				Action:      moreThanArgsCountMiddleware(1, commands.Remove),
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:    "soft",
@@ -171,7 +187,7 @@ func NewApp() *cli.App {
 			{
 				Name:        "clean",
 				Aliases:     []string{"cl"},
-				Usage:       "clean",
+				Usage:       "remove all outdated collected additions and other trash",
 				UsageText:   "dcfg [--verbose] [--config] clean",
 				Description: "removes everything except collected additions, pinned objects, '.git' directory and dcfg config file",
 				Action:      commands.Clean,

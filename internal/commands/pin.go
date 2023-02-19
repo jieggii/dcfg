@@ -10,40 +10,39 @@ import (
 
 func Pin(ctx *cli.Context) error {
 	cfgPath := ctx.String("config")
-	remove := ctx.Bool("remove")
-
 	cfg, err := config.NewConfigFromFile(cfgPath)
 	if err != nil {
 		return err
 	}
 
-	args := ctx.Args()
-	pinned := path.Clean(args.First())
+	remove := ctx.Bool("remove")
 
-	if path.IsAbs(pinned) {
-		return fmt.Errorf("path to object to be pinned must be relative (got absolute path '%v')", pinned)
-	}
+	pins := ctx.Args().Slice()
 
-	if remove {
-		if err := cfg.Pinned.Remove(pinned); err != nil {
-			return err
+	for _, pin := range pins {
+		pin = path.Clean(pin)
+		if path.IsAbs(pin) {
+			return fmt.Errorf("path to object to be pinned must be relative (got absolute path '%v')", pin)
+		}
+
+		if !remove { // if --remove flag is not used
+			if err = cfg.Pinned.Append(pin); err != nil {
+				output.Error.Println("could not pin '%v' (%v)", pin, err)
+				continue
+			}
+			output.Plus.Printf("pinned '%v'", pin)
+
+		} else { // if --remove flag is used
+			if err := cfg.Pinned.Remove(pin); err != nil {
+				output.Error.Println("could not unpin '%v' (%v)", pin, err)
+				continue
+			}
+			output.Minus.Printf("unpinned '%v'", pin)
 		}
 		if err = cfg.DumpToFile(cfgPath); err != nil {
 			return err
 		}
-		output.Minus.Printf("unpinned '%v'\n", pinned)
-	} else {
-		if err = cfg.Pinned.Append(pinned); err != nil {
-			return err
-		}
-		if err = cfg.DumpToFile(cfgPath); err != nil {
-			return err
-		}
-		output.Plus.Printf("pinned '%v'\n", pinned)
 	}
-	// cfg.DumpToFile is called inside both codeblocks and not after them
-	// because error must be returned even in case if cfg.Pinned.Append or
-	// cfg.Pinned.Remove succeeded, but cfg.DumpToFile failed
 
 	return nil
 }

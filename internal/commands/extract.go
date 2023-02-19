@@ -2,14 +2,13 @@ package commands
 
 import (
 	"fmt"
-	"github.com/jieggii/dcfg/internal"
 	"github.com/jieggii/dcfg/internal/config"
 	"github.com/jieggii/dcfg/internal/diff"
 	"github.com/jieggii/dcfg/internal/fs"
 	"github.com/jieggii/dcfg/internal/input"
 	"github.com/jieggii/dcfg/internal/output"
 	"github.com/urfave/cli/v2"
-	"os"
+	"path"
 	"strings"
 )
 
@@ -19,18 +18,59 @@ func Extract(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	nodiff := ctx.Bool("nodiff")
 
+	// options
+	nodiff := ctx.Bool("nodiff")
+	hard := ctx.Bool("hard")
+	sourcePrefixReplacements := ctx.StringSlice("overwrite-source-prefix")
+
+	// hidden options
+	diffBinPath := ctx.String("diff-bin-path")
+
+	sourcePrefixReplaceMap := map[string]string{}
+
+	// fill sourcePrefixReplaceMap
+	for _, directive := range sourcePrefixReplacements {
+		tokens := strings.Split(directive, ":")
+		if len(tokens) != 2 {
+			return fmt.Errorf(
+				"invalid directive '%v' for --overwrite-source-prefix option",
+				directive,
+			)
+		}
+
+		oldPrefix := path.Clean(tokens[0])
+		newPrefix := path.Clean(tokens[1])
+
+		// check if prefix (being replaced) exists in any of additions:
+		oldPrefixIsPresent := false
+		for _, addition := range cfg.Additions.Paths {
+			if strings.HasPrefix(addition, oldPrefix) {
+				oldPrefixIsPresent = true
+				break
+			}
+		}
+
+		if !oldPrefixIsPresent {
+			return fmt.Errorf("there is not prefix '%v' in any of the additions", oldPrefix)
+		}
+
+		sourcePrefixReplaceMap[oldPrefix] = newPrefix
+	}
+
+	fmt.Println(sourcePrefixReplaceMap)
 	additionsCount := len(cfg.Additions.Paths)
 	if additionsCount == 0 {
 		return fmt.Errorf("there are no additions defined")
 	}
-	output.Stdout.Println("extracting collected additions:")
 	for i, addition := range cfg.Additions.Paths {
+		if i > 0 && i < additionsCount-1 {
+			output.Stdout.Println() // add blank line for more pretty output
+		}
 		destination, found := cfg.ResolveAdditionDestination(addition)
 		if !found {
 			output.Warning.Printf(
-				"cold not resolve destination for '%v'\n",
+				"cold not resolve destination for '%v'",
 				addition,
 			)
 			continue
@@ -38,30 +78,30 @@ func Extract(ctx *cli.Context) error {
 		var collected bool
 		if collected, err = cfg.Additions.IsCollected(destination); err != nil {
 			output.Warning.Println(
-				"could not check if '%v' collected (%v), skipping\n",
+				"could not check if '%v' collected (%v), skipping",
 				addition, err,
 			)
 			continue
 		}
-		if !collected {
-			output.Minus.Printf("skipping uncollected '%v'\n", addition)
+		if !collected { // if addition is not collected
+			output.Minus.Printf("skipping uncollected '%v'", addition)
 			continue
 		}
+
 		outputString := fmt.Sprintf(
-			"(%v/%v) '%v' -> '%v'",
+			"Addition %v/%v: '%v' -> '%v'",
 			i+1, additionsCount, destination, addition,
 		)
-
 		output.Stdout.Printf(outputString)
 
-		if !nodiff {
+		if !nodiff { // if --no-diff flag is not used
 			outputStringLen := len(outputString)
 			outputDivider := strings.Repeat("-", outputStringLen)
 
 			output.Stdout.Println(strings.Repeat(" ", int(outputStringLen/2)-4), "diff(s):")
 			output.Stdout.Println(outputDivider)
 
-			diffOutput, err := diff.GetDiff(addition, destination)
+			diffOutput, err := diff.GetDiff(diffBinPath, addition, destination)
 			if diffOutput != "" {
 				output.Stdout.Println(diffOutput)
 			}
@@ -71,13 +111,15 @@ func Extract(ctx *cli.Context) error {
 				output.Error.Println("error running diff: %v", err)
 			}
 		}
-		confirm, err := input.ConfirmationPrompt("proceed with copying?")
-		if err != nil {
-			output.Error.Println(err)
-			os.Exit(internal.GenericErrorExitCode)
-		}
-		if !confirm {
-			continue
+		if !hard { // if --hard flag is not used
+			confirm, err := input.ConfirmationPrompt("proceed with copying?")
+			if err != nil {
+				return err
+			}
+			if !confirm {
+				output.Warning.Printf("skipping '%v'", addition)
+				continue
+			}
 		}
 
 		if err := fs.Copy(destination, addition); err != nil {
@@ -85,7 +127,10 @@ func Extract(ctx *cli.Context) error {
 				"could not copy '%v' -> '%v' (%v)",
 				destination, addition, err,
 			)
+			output.Warning.Printf("skipping '%v'", addition)
+			continue
 		}
+		output.Plus.Printf("'%v' -> '%v'", destination, addition)
 	}
 
 	return nil

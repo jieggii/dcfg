@@ -12,7 +12,7 @@ func handleUsageError(ctx *cli.Context, err error, _ bool) error {
 	return err
 }
 
-func handleCommandNotFoundError(ctx *cli.Context, command string) {
+func handleCommandNotFoundError(_ *cli.Context, command string) {
 	output.Error.Printf("'%v' is not a dcfg command. See 'dcfg --help'", command)
 	os.Exit(internal.GenericErrorExitCode)
 }

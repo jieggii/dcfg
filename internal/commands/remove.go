@@ -12,49 +12,65 @@ import (
 
 func Remove(ctx *cli.Context) error {
 	cfgPath := ctx.String("config")
-	soft := ctx.Bool("soft")
-
 	cfg, err := config.NewConfigFromFile(cfgPath)
 	if err != nil {
 		return err
 	}
 
-	var additionSourcePath string
-	var additionDestinationPath string
-	addition := path.Clean(ctx.Args().First())
+	// flags
+	soft := ctx.Bool("soft")
 
-	if path.IsAbs(addition) { // addition source is provided
-		additionSourcePath = addition
-		additionDestinationPath, _ = cfg.ResolveAdditionDestination(addition)
-		// don't check if addition destination path is resolved 'cause this
-		// is not needed to be done
-	} else { // path to destination is provided
-		var resolved bool
-		additionSourcePath, resolved = cfg.ResolveAdditionSource(addition)
-		if !resolved {
-			return fmt.Errorf("could not resolve source of '%v'", addition)
+	targets := ctx.Args().Slice()
+	for _, target := range targets {
+		var addition string    // addition = path to source
+		var destination string // path to destination of collected addition
+
+		target = path.Clean(target)
+
+		if path.IsAbs(target) { // addition is provided
+			addition = target
+			destination, _ = cfg.ResolveAdditionDestination(target)
+			// don't check if addition destination path is resolved because
+			// suitable binding can be already deleted and resolving will
+			// fail because of that
+		} else { // path to addition destination is provided
+			var resolved bool
+			addition, resolved = cfg.ResolveAdditionSource(target)
+			if !resolved {
+				return fmt.Errorf("could not resolve source of '%v'", target)
+			}
+			destination = target
 		}
-		additionDestinationPath = addition
-	}
-	if err := cfg.Additions.Remove(additionSourcePath); err != nil {
-		return err
+		if err := cfg.Additions.Remove(addition); err != nil {
+			output.Error.Printf(
+				"could not remove '%v' from additions list",
+				addition,
+			)
+			continue
+		}
+		output.Minus.Printf("removed '%v' from additions list", addition)
+
+		additionDestinationExists, err := fs.NodeExists(destination)
+		if err != nil {
+			output.Warning.Println(
+				"could not check if '%v' exists (%v)", destination, err,
+			)
+		}
+
+		if !soft && additionDestinationExists {
+			err := os.RemoveAll(destination)
+			if err != nil {
+				output.Error.Printf(
+					"could not remove '%v' (%v)", destination, err,
+				)
+				continue
+			}
+			output.Minus.Printf("removed '%v'", destination)
+		}
 	}
 	if err := cfg.DumpToFile(cfgPath); err != nil {
 		return err
 	}
-	output.Minus.Printf("removed '%v' from additions list", additionSourcePath)
 
-	additionDestinationExists, err := fs.NodeExists(additionDestinationPath)
-	if err != nil {
-		output.Warning.Println(err)
-	}
-
-	if !soft && additionDestinationExists {
-		err := os.RemoveAll(additionDestinationPath)
-		if err != nil {
-			return err
-		}
-		output.Minus.Printf("removed '%v'", additionDestinationPath)
-	}
 	return nil
 }

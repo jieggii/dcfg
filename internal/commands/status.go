@@ -9,13 +9,13 @@ import (
 
 func Status(ctx *cli.Context) error {
 	cfgPath := ctx.String("config")
-
 	cfg, err := config.NewConfigFromFile(cfgPath)
 	if err != nil {
 		return err
 	}
+
 	// config file
-	output.Stdout.Printf("dcfg config file: '%v'\n", cfgPath)
+	output.Stdout.Printf("dcfg config file: '%v'", cfgPath)
 
 	// bindings
 	output.Stdout.Println("bindings:")
@@ -25,7 +25,7 @@ func Status(ctx *cli.Context) error {
 			if err != nil {
 				panic(err)
 			}
-			output.Stdout.Printf(" %v. %-"+strconv.Itoa(cfg.Bindings.LongestSourceLen)+"v -> %v\n", i+1, source, destination)
+			output.Stdout.Printf(" %v. %-"+strconv.Itoa(cfg.Bindings.LongestSourceLen)+"v -> %v", i+1, source, destination)
 		}
 	} else {
 		output.Stdout.Println(" * no bindings yet *")
@@ -64,7 +64,7 @@ func Status(ctx *cli.Context) error {
 	output.Stdout.Println("pinned objects:")
 	if cfg.Pinned.Any() {
 		for _, pinned := range cfg.Pinned {
-			output.Stdout.Printf(" - %v\n", pinned)
+			output.Stdout.Printf(" - %v", pinned)
 		}
 	} else {
 		output.Stdout.Println(" * no pins yet *")

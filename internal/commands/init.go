@@ -18,6 +18,6 @@ func Init(ctx *cli.Context) error {
 	if err := cfg.DumpToFile(cfgPath); err != nil {
 		return err
 	}
-	output.Plus.Printf("created dcfg config file '%v'\n", cfgPath)
+	output.Plus.Printf("created dcfg config file '%v'", cfgPath)
 	return nil
 }

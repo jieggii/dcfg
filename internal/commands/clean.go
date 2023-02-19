@@ -13,14 +13,13 @@ var ignoredByDefault = []string{".git", ".gitignore"}
 
 func Clean(ctx *cli.Context) error {
 	cfgPath := ctx.String("config")
-
-	confirmation := ctx.Bool("yes")
-	verbose := ctx.Bool("verbose")
-
 	cfg, err := config.NewConfigFromFile(cfgPath)
 	if err != nil {
 		return err
 	}
+
+	confirmation := ctx.Bool("yes")
+	verbose := ctx.Bool("verbose")
 
 	nodes, err := os.ReadDir(".")
 	if err != nil {
@@ -35,19 +34,19 @@ func Clean(ctx *cli.Context) error {
 
 		if util.ItemIsInArray(ignoredByDefault, name) { // if node is ignored by default
 			if verbose {
-				output.Verbose.Printf("ignoring '%v' because it is ignored by default\n", name)
+				output.Verbose.Printf("ignoring '%v' because it is ignored by default", name)
 			}
 			continue
 		}
 		if cfg.Pinned.Exists(name) { // if node is pinned
 			if verbose {
-				output.Verbose.Printf("ignoring '%v' because it is pinned\n", name)
+				output.Verbose.Printf("ignoring '%v' because it is pinned", name)
 			}
 			continue
 		}
 		if cfg.Bindings.DestinationWithPrefixExists(name) { // if node is binding destination
 			if verbose {
-				output.Verbose.Printf("ignoring '%v' because it is binding destination\n", name)
+				output.Verbose.Printf("ignoring '%v' because it is binding destination", name)
 			}
 			continue
 		}
@@ -60,7 +59,7 @@ func Clean(ctx *cli.Context) error {
 
 	output.Stdout.Printf("nodes to be deleted:")
 	for _, path := range deletions {
-		output.Stdout.Printf("- '%v'\n", path)
+		output.Stdout.Printf("- '%v'", path)
 	}
 	if !confirmation {
 		output.Stdout.Println()

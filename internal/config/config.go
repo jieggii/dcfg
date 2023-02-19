@@ -44,11 +44,11 @@ func (c *Config) ResolveAdditionSource(additionDestination string) (string, bool
 }
 
 func (c *Config) DumpToFile(path string) error {
-	data, err := json.MarshalIndent(c, "", " ")
-
+	data, err := json.MarshalIndent(c, "", "    ")
 	if err != nil {
 		panic(fmt.Errorf("unable to marshal config (%v)", err))
 	}
+	
 	if err = os.WriteFile(path, data, configFilePermission); err != nil {
 		return err
 	}
