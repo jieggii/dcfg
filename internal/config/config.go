@@ -12,31 +12,31 @@ import (
 const configFilePermission = 0644
 
 type Config struct {
-	Bindings  Bindings  `json:"bindings"`  // path-to-path bindings
-	Additions Additions `json:"additions"` // paths to destinations of additions
-	Pinned    Pinned    `json:"pins"`      // paths to pinned objects
+	Bindings Bindings `json:"bindings"` // path-to-path bindings
+	Targets  Targets  `json:"targets"`  // paths to destinations of targets
+	Pinned   Pinned   `json:"pins"`     // paths to pinned objects
 }
 
-func (c *Config) ResolveAdditionDestination(addition string) (string, bool) {
+func (c *Config) ResolveTargetDestination(target string) (string, bool) {
 	for _, bindingSource := range c.Bindings.Sources {
-		if strings.HasPrefix(addition, bindingSource) {
+		if strings.HasPrefix(target, bindingSource) {
 			bindingDestination, err := c.Bindings.ResolveDestination(bindingSource)
 			if err != nil {
 				panic(err)
 			}
-			destination := strings.Replace(addition, bindingSource, bindingDestination, 1)
+			destination := strings.Replace(target, bindingSource, bindingDestination, 1)
 			return destination, true
 		}
 	}
 	return "", false
 }
 
-func (c *Config) ResolveAdditionSource(additionDestination string) (string, bool) {
-	for _, addition := range c.Additions.Paths {
-		destination, resolved := c.ResolveAdditionDestination(addition)
+func (c *Config) ResolveTargetSource(targetDestination string) (string, bool) {
+	for _, target := range c.Targets.Paths {
+		destination, resolved := c.ResolveTargetDestination(target)
 		if resolved {
-			if destination == additionDestination {
-				return addition, true
+			if destination == targetDestination {
+				return target, true
 			}
 		}
 	}
@@ -48,7 +48,7 @@ func (c *Config) DumpToFile(path string) error {
 	if err != nil {
 		panic(fmt.Errorf("unable to marshal config (%v)", err))
 	}
-	
+
 	if err = os.WriteFile(path, data, configFilePermission); err != nil {
 		return err
 	}
@@ -57,9 +57,9 @@ func (c *Config) DumpToFile(path string) error {
 
 func NewConfig() *Config {
 	return &Config{
-		Bindings:  Bindings{},
-		Additions: Additions{},
-		Pinned:    Pinned{},
+		Bindings: Bindings{},
+		Targets:  Targets{},
+		Pinned:   Pinned{},
 	}
 }
 

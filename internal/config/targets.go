@@ -7,18 +7,18 @@ import (
 	"github.com/jieggii/dcfg/internal/util"
 )
 
-type Additions struct {
-	Paths []string // absolute paths to additions
+type Targets struct {
+	Paths []string // absolute paths to targets
 
 	LongestPathLen int
 }
 
-func (a Additions) MarshalJSON() ([]byte, error) {
+func (a Targets) MarshalJSON() ([]byte, error) {
 	data, err := json.Marshal(a.Paths)
 	return data, err
 }
 
-func (a *Additions) UnmarshalJSON(data []byte) error {
+func (a *Targets) UnmarshalJSON(data []byte) error {
 	var paths []string
 
 	if err := json.Unmarshal(data, &paths); err != nil {
@@ -33,7 +33,7 @@ func (a *Additions) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a *Additions) Append(path string) error {
+func (a *Targets) Append(path string) error {
 	if a.Exists(path) {
 		return fmt.Errorf("path '%v' is already registered as addition", path)
 	}
@@ -47,7 +47,7 @@ func (a *Additions) Append(path string) error {
 	return nil
 }
 
-func (a *Additions) Remove(path string) error {
+func (a *Targets) Remove(path string) error {
 	i := util.ItemIndex(a.Paths, path)
 	if i == -1 {
 		return fmt.Errorf("'%v' is not registered as addition", path)
@@ -56,15 +56,15 @@ func (a *Additions) Remove(path string) error {
 	return nil
 }
 
-func (a *Additions) Exists(path string) bool {
+func (a *Targets) Exists(path string) bool {
 	return util.ItemIsInArray(a.Paths, path)
 }
 
-func (a *Additions) Any() bool {
+func (a *Targets) Any() bool {
 	return len(a.Paths) != 0
 }
 
-func (a *Additions) IsCollected(destination string) (bool, error) {
+func (a *Targets) IsCollected(destination string) (bool, error) {
 	collected, err := fs.NodeExists(destination)
 	if err != nil {
 		return false, fmt.Errorf("could not check if '%v' exists (%v)", destination, err)

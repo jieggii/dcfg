@@ -22,42 +22,43 @@ func Remove(ctx *cli.Context) error {
 
 	targets := ctx.Args().Slice()
 	for _, target := range targets {
-		var addition string    // addition = path to source
-		var destination string // path to destination of collected addition
+		var source string      // path to source of target
+		var destination string // path to destination of collected target
 
 		target = path.Clean(target)
 
-		if path.IsAbs(target) { // addition is provided
-			addition = target
-			destination, _ = cfg.ResolveAdditionDestination(target)
-			// don't check if addition destination path is resolved because
+		if path.IsAbs(target) { // target source is provided
+			source = target
+			destination, _ = cfg.ResolveTargetDestination(target)
+			// don't check if target destination path is resolved because
 			// suitable binding can be already deleted and resolving will
 			// fail because of that
-		} else { // path to addition destination is provided
+		} else { // path to target destination is provided
 			var resolved bool
-			addition, resolved = cfg.ResolveAdditionSource(target)
+			source, resolved = cfg.ResolveTargetSource(target)
 			if !resolved {
 				return fmt.Errorf("could not resolve source of '%v'", target)
 			}
+
 			destination = target
 		}
-		if err := cfg.Additions.Remove(addition); err != nil {
+		if err := cfg.Targets.Remove(target); err != nil {
 			output.Error.Printf(
-				"could not remove '%v' from additions list",
-				addition,
+				"could not remove '%v' from targets list",
+				source,
 			)
 			continue
 		}
-		output.Minus.Printf("removed '%v' from additions list", addition)
+		output.Minus.Printf("removed '%v' from targets list", target)
 
-		additionDestinationExists, err := fs.NodeExists(destination)
+		targetDestinationExists, err := fs.NodeExists(destination)
 		if err != nil {
 			output.Warning.Println(
 				"could not check if '%v' exists (%v)", destination, err,
 			)
 		}
 
-		if !soft && additionDestinationExists {
+		if !soft && targetDestinationExists {
 			err := os.RemoveAll(destination)
 			if err != nil {
 				output.Error.Printf(

@@ -15,6 +15,7 @@ func Bind(ctx *cli.Context) error {
 		return err
 	}
 
+	// flags
 	remove := ctx.Bool("remove")
 
 	args := ctx.Args()
@@ -22,7 +23,10 @@ func Bind(ctx *cli.Context) error {
 
 	source := path.Clean(args.First())
 	if !path.IsAbs(source) {
-		return fmt.Errorf("source path must be absolute (got relative path '%v')", source)
+		return fmt.Errorf(
+			"source path must be absolute (got relative path '%v')",
+			source,
+		)
 	}
 
 	if !remove { // `bind` command was called without --remove flag
@@ -34,12 +38,18 @@ func Bind(ctx *cli.Context) error {
 		}
 		destination := path.Clean(args.Get(1))
 		if path.IsAbs(destination) {
-			return fmt.Errorf("destination path must be relative (got absolute path '%v')", destination)
+			return fmt.Errorf(
+				"destination path must be relative (got absolute path '%v')",
+				destination,
+			)
 		}
+
 		if err = cfg.Bindings.Append(source, destination); err != nil {
 			return err
 		}
-		output.Plus.Printf("registered new binding: %v -> %v", source, destination)
+		output.Plus.Printf("registered new binding: %v -> %v",
+			source, destination,
+		)
 	} else { // `bind` command was called with --remove flag
 		if argsCount != 1 {
 			return fmt.Errorf(
@@ -51,6 +61,7 @@ func Bind(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
+
 		if err := cfg.Bindings.Remove(source); err != nil {
 			return err
 		}

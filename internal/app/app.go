@@ -56,7 +56,7 @@ func NewApp() *cli.App {
 				Aliases:      []string{"s"},
 				Usage:        "show information about current state",
 				UsageText:    "dcfg [--config] status",
-				Description:  "shows context directory, defined bindings, pinned directories and additions",
+				Description:  "shows useful information about targets, defined bindings and pinned nodes",
 				Action:       explicitArgsCountMiddleware(0, commands.Status),
 				OnUsageError: handleUsageError,
 				Category:     serviceCategory,
@@ -83,14 +83,14 @@ func NewApp() *cli.App {
 			{
 				Name:        "add",
 				Aliases:     []string{"a"},
-				Usage:       "append addition",
-				UsageText:   "dcfg [--verbose] [--config] add <PATH1> ...",
-				Description: "appends new addition",
+				Usage:       "add target(s)",
+				UsageText:   "dcfg [--verbose] [--config] add <TARGET 1> ...",
+				Description: "adds new target(s)",
 				Action:      moreThanArgsCountMiddleware(1, commands.Add),
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:    "collect",
-						Usage:   "copy addition to context directory according to the bindings",
+						Usage:   "collect added target(s)",
 						Value:   false,
 						Aliases: []string{"c"},
 					},
@@ -120,9 +120,9 @@ func NewApp() *cli.App {
 			{
 				Name:        "collect",
 				Aliases:     []string{"c"},
-				Usage:       "collect additions",
+				Usage:       "collect targets",
 				UsageText:   "dcfg [--config] collect",
-				Description: "copies all registered additions to context directory according to bindings",
+				Description: "copies all targets according to the bindings",
 				Action:      explicitArgsCountMiddleware(0, commands.Collect),
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
@@ -137,9 +137,9 @@ func NewApp() *cli.App {
 			{
 				Name:        "extract",
 				Aliases:     []string{"e"},
-				Usage:       "extract collected additions",
+				Usage:       "extract collected targets",
 				UsageText:   "dcfg [--config] extract [--hard] [--no-diff] [--overwrite-source-prefix oldPrefix:newPrefix]",
-				Description: "copies all collected additions to their destinations",
+				Description: "copies all collected targets to their sources",
 				Action:      explicitArgsCountMiddleware(0, commands.Extract),
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
@@ -169,14 +169,14 @@ func NewApp() *cli.App {
 			{
 				Name:        "remove",
 				Aliases:     []string{"rm"},
-				Usage:       "remove addition",
-				UsageText:   "dcfg [--config] remove <PATH1> ...",
-				Description: "removes addition",
+				Usage:       "remove target",
+				UsageText:   "dcfg [--config] remove <TARGET 1> ...",
+				Description: "removes target",
 				Action:      moreThanArgsCountMiddleware(1, commands.Remove),
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:    "soft",
-						Usage:   "do not remove collected objects from context directory",
+						Usage:   "do not remove collected targets",
 						Value:   false,
 						Aliases: []string{"s"},
 					},
@@ -187,9 +187,9 @@ func NewApp() *cli.App {
 			{
 				Name:        "clean",
 				Aliases:     []string{"cl"},
-				Usage:       "remove all outdated collected additions and other trash",
+				Usage:       "remove all outdated collected targets and other trash",
 				UsageText:   "dcfg [--verbose] [--config] clean",
-				Description: "removes everything except collected additions, pinned objects, '.git' directory and dcfg config file",
+				Description: "removes everything except up-to-date collected targets, pinned nodes, '.git' directory and dcfg config file",
 				Action:      commands.Clean,
 				Flags: []cli.Flag{
 					&cli.BoolFlag{

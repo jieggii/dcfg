@@ -18,6 +18,7 @@ func Clean(ctx *cli.Context) error {
 		return err
 	}
 
+	// options
 	confirmation := ctx.Bool("yes")
 	verbose := ctx.Bool("verbose")
 
@@ -26,27 +27,33 @@ func Clean(ctx *cli.Context) error {
 		return err
 	}
 
-	var deletions []string
-	ignoredByDefault = append(ignoredByDefault, cfgPath)
+	ignoredByDefault = append(ignoredByDefault, cfgPath) // add current dcfg config to ignored by default
 
+	var deletions []string
 	for _, node := range nodes {
 		name := node.Name()
 
 		if util.ItemIsInArray(ignoredByDefault, name) { // if node is ignored by default
 			if verbose {
-				output.Verbose.Printf("ignoring '%v' because it is ignored by default", name)
+				output.Verbose.Printf(
+					"ignoring '%v' because it is ignored by default", name,
+				)
 			}
 			continue
 		}
 		if cfg.Pinned.Exists(name) { // if node is pinned
 			if verbose {
-				output.Verbose.Printf("ignoring '%v' because it is pinned", name)
+				output.Verbose.Printf(
+					"ignoring '%v' because it is pinned", name,
+				)
 			}
 			continue
 		}
 		if cfg.Bindings.DestinationWithPrefixExists(name) { // if node is binding destination
 			if verbose {
-				output.Verbose.Printf("ignoring '%v' because it is binding destination", name)
+				output.Verbose.Printf(
+					"ignoring '%v' because it is binding destination", name,
+				)
 			}
 			continue
 		}

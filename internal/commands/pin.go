@@ -15,6 +15,7 @@ func Pin(ctx *cli.Context) error {
 		return err
 	}
 
+	// flags
 	remove := ctx.Bool("remove")
 
 	pins := ctx.Args().Slice()

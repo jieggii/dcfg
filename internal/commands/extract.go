@@ -27,9 +27,10 @@ func Extract(ctx *cli.Context) error {
 	// hidden options
 	diffBinPath := ctx.String("diff-bin-path")
 
-	sourcePrefixReplaceMap := map[string]string{}
+	sourcePrefixReplaceMap := make(map[string]string)
 
-	// fill sourcePrefixReplaceMap
+	// fill sourcePrefixReplaceMap - map of prefix replacements of targets
+	// old -> new
 	for _, directive := range sourcePrefixReplacements {
 		tokens := strings.Split(directive, ":")
 		if len(tokens) != 2 {
@@ -42,55 +43,77 @@ func Extract(ctx *cli.Context) error {
 		oldPrefix := path.Clean(tokens[0])
 		newPrefix := path.Clean(tokens[1])
 
-		// check if prefix (being replaced) exists in any of additions:
+		// check if old prefix exists in any of targets:
 		oldPrefixIsPresent := false
-		for _, addition := range cfg.Additions.Paths {
-			if strings.HasPrefix(addition, oldPrefix) {
+		for _, target := range cfg.Targets.Paths {
+			if strings.HasPrefix(target, oldPrefix) {
 				oldPrefixIsPresent = true
 				break
 			}
 		}
 
 		if !oldPrefixIsPresent {
-			return fmt.Errorf("there is not prefix '%v' in any of the additions", oldPrefix)
+			return fmt.Errorf(
+				"there is not prefix '%v' in any of the targets",
+				oldPrefix,
+			)
 		}
 
 		sourcePrefixReplaceMap[oldPrefix] = newPrefix
 	}
 
-	fmt.Println(sourcePrefixReplaceMap)
-	additionsCount := len(cfg.Additions.Paths)
-	if additionsCount == 0 {
-		return fmt.Errorf("there are no additions defined")
+	// print sourcePrefixReplaceMap
+	//output.Stdout.Println(
+	//	"overwritten target destinations:",
+	//)
+	//for oldPrefix, newPrefix := range sourcePrefixReplaceMap {
+	//	output.Stdout.Printf("%v -> %)
+	//}
+
+	targetsCount := len(cfg.Targets.Paths)
+	if targetsCount == 0 {
+		return fmt.Errorf("there are no targets")
 	}
-	for i, addition := range cfg.Additions.Paths {
-		if i > 0 && i < additionsCount-1 {
+	for i, target := range cfg.Targets.Paths {
+		if i > 0 && i < targetsCount-1 {
 			output.Stdout.Println() // add blank line for more pretty output
 		}
-		destination, found := cfg.ResolveAdditionDestination(addition)
+		destination, found := cfg.ResolveTargetDestination(target)
 		if !found {
 			output.Warning.Printf(
 				"cold not resolve destination for '%v'",
-				addition,
+				target,
 			)
 			continue
 		}
+		// overwrite target prefix
+		for oldPrefix, newPrefix := range sourcePrefixReplaceMap {
+			if strings.HasPrefix(target, oldPrefix) {
+				newTarget := strings.Replace(target, oldPrefix, newPrefix, 1)
+				output.Warning.Printf(
+					"using '%v' instead of '%v'",
+					newTarget, target,
+				)
+				target = newTarget
+			}
+		}
+
 		var collected bool
-		if collected, err = cfg.Additions.IsCollected(destination); err != nil {
+		if collected, err = cfg.Targets.IsCollected(destination); err != nil {
 			output.Warning.Println(
 				"could not check if '%v' collected (%v), skipping",
-				addition, err,
+				target, err,
 			)
 			continue
 		}
-		if !collected { // if addition is not collected
-			output.Minus.Printf("skipping uncollected '%v'", addition)
+		if !collected { // if target is not collected
+			output.Minus.Printf("skipping uncollected '%v'", target)
 			continue
 		}
 
 		outputString := fmt.Sprintf(
-			"Addition %v/%v: '%v' -> '%v'",
-			i+1, additionsCount, destination, addition,
+			"Target %v/%v: '%v' -> '%v'",
+			i+1, targetsCount, destination, target,
 		)
 		output.Stdout.Printf(outputString)
 
@@ -101,14 +124,14 @@ func Extract(ctx *cli.Context) error {
 			output.Stdout.Println(strings.Repeat(" ", int(outputStringLen/2)-4), "diff(s):")
 			output.Stdout.Println(outputDivider)
 
-			diffOutput, err := diff.GetDiff(diffBinPath, addition, destination)
+			diffOutput, err := diff.GetDiff(diffBinPath, target, destination)
 			if diffOutput != "" {
 				output.Stdout.Println(diffOutput)
 			}
 			output.Stdout.Println(outputDivider)
 
 			if err != nil {
-				output.Error.Println("error running diff: %v", err)
+				output.Error.Printf("error running diff (%v)", err)
 			}
 		}
 		if !hard { // if --hard flag is not used
@@ -117,20 +140,20 @@ func Extract(ctx *cli.Context) error {
 				return err
 			}
 			if !confirm {
-				output.Warning.Printf("skipping '%v'", addition)
+				output.Warning.Printf("skipping '%v'", target)
 				continue
 			}
 		}
 
-		if err := fs.Copy(destination, addition); err != nil {
+		if err := fs.Copy(destination, target); err != nil {
 			output.Warning.Println(
 				"could not copy '%v' -> '%v' (%v)",
-				destination, addition, err,
+				destination, target, err,
 			)
-			output.Warning.Printf("skipping '%v'", addition)
+			output.Warning.Printf("skipping '%v'", target)
 			continue
 		}
-		output.Plus.Printf("'%v' -> '%v'", destination, addition)
+		output.Plus.Printf("'%v' -> '%v'", destination, target)
 	}
 
 	return nil

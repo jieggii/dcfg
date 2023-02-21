@@ -10,8 +10,6 @@ import (
 	"path"
 )
 
-const missingSuitableBindingErrorText = "could not resolve addition destination (missing suitable binding)"
-
 func Add(ctx *cli.Context) error {
 	cfgPath := ctx.String("config")
 	cfg, err := config.NewConfigFromFile(cfgPath)
@@ -19,51 +17,57 @@ func Add(ctx *cli.Context) error {
 		return err
 	}
 
-	//verbose := ctx.Bool("verbose")
+	// options
 	collect := ctx.Bool("collect")
 
-	additions := ctx.Args().Slice()
+	// arguments
+	targets := ctx.Args().Slice()
 
 	destinations := map[string]string{}
 
-	// at first validating:
-	for _, addition := range additions {
-		addition = path.Clean(addition)
-		if !path.IsAbs(addition) {
-			return fmt.Errorf("path to addition must be absolute (got relative path '%v')", addition)
+	// validating:
+	for _, target := range targets {
+		target = path.Clean(target)
+		if !path.IsAbs(target) {
+			return fmt.Errorf(
+				"path to target must be absolute (got relative path '%v')",
+				target,
+			)
 		}
-		destination, resolved := cfg.ResolveAdditionDestination(addition)
+
+		destination, resolved := cfg.ResolveTargetDestination(target)
 		if !resolved {
-			return errors.New(missingSuitableBindingErrorText)
+			return errors.New(
+				"could not resolve target destination (missing suitable binding)",
+			)
 		}
-		destinations[addition] = destination
+		destinations[target] = destination
 	}
 
-	// and only then performing actions:
-	for _, addition := range additions {
-		addition = path.Clean(addition)
-		destination := destinations[addition]
+	// performing actions:
+	for _, target := range targets {
+		target = path.Clean(target)
+		destination := destinations[target]
 
-		if err := cfg.Additions.Append(addition); err != nil {
+		if err := cfg.Targets.Append(target); err != nil {
 			output.Error.Println(
-				"could not append '%v' to additions (%v)", addition, err,
+				"could not append '%v' to targets (%v)", target, err,
 			)
 			continue
 		}
-		output.Plus.Printf("appended new addition '%v'", addition)
-
-		//if verbose {
-		//	output.Verbose.Printf("the addition will be copied to '%v' when collecting", destination)
-		//}
+		output.Plus.Printf("appended new target '%v'", target)
 
 		if collect {
-			if err := fs.Copy(addition, destination); err != nil {
+			if err := fs.Copy(target, destination); err != nil {
 				output.Error.Printf(
-					"could not copy '%v' to '%v' (%v)", addition, destination, err,
+					"could not copy '%v' to '%v' (%v)",
+					target, destination, err,
 				)
 				continue
 			}
-			output.Plus.Printf("copied '%v' -> '%v'", addition, destination)
+			output.Plus.Printf(
+				"copied '%v' -> '%v'", target, destination,
+			)
 		}
 	}
 

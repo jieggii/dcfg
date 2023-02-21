@@ -32,21 +32,21 @@ func Status(ctx *cli.Context) error {
 	}
 	output.Stdout.Println()
 
-	// additions
-	output.Stdout.Println("additions:")
-	if cfg.Additions.Any() {
-		longestAdditionLenString := strconv.Itoa(cfg.Additions.LongestPathLen)
-		for _, addition := range cfg.Additions.Paths {
-			destination, resolved := cfg.ResolveAdditionDestination(addition)
+	// targets
+	output.Stdout.Println("targets:")
+	if cfg.Targets.Any() {
+		longestTargetPathLenString := strconv.Itoa(cfg.Targets.LongestPathLen)
+		for _, target := range cfg.Targets.Paths {
+			destination, resolved := cfg.ResolveTargetDestination(target)
 
 			var collectedIndicator string
 			if resolved { // if destination was resolved
-				collected, err := cfg.Additions.IsCollected(destination)
-				if collected { // addition is collected
+				collected, err := cfg.Targets.IsCollected(destination)
+				if collected { // target is collected
 					collectedIndicator = "+"
-				} else if !collected && err == nil { // addition is not collected
+				} else if !collected && err == nil { // target is not collected
 					collectedIndicator = "-"
-				} else { // could not check if addition is collected
+				} else { // could not check if target is collected
 					collectedIndicator = "?"
 					output.Warning.Println(err)
 				}
@@ -54,10 +54,10 @@ func Status(ctx *cli.Context) error {
 				collectedIndicator = "!"
 				destination = "[MISSING SUITABLE BINDING]"
 			}
-			output.Stdout.Printf(" %v %-"+longestAdditionLenString+"v -> %v", collectedIndicator, addition, destination)
+			output.Stdout.Printf(" %v %-"+longestTargetPathLenString+"v -> %v", collectedIndicator, target, destination)
 		}
 	} else {
-		output.Stdout.Println(" * no additions yet *")
+		output.Stdout.Println(" * no targets yet *")
 	}
 
 	output.Stdout.Println()
