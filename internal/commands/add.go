@@ -34,6 +34,13 @@ func Add(ctx *cli.Context) error {
 				target,
 			)
 		}
+		exists, err := fs.NodeExists(target)
+		if err != nil {
+			return err
+		}
+		if !exists {
+			return errors.New("'%v' does not exist")
+		}
 
 		destination, resolved := cfg.ResolveTargetDestination(target)
 		if !resolved {
