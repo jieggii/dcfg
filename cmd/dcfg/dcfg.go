@@ -14,7 +14,7 @@ func main() {
 	go func() {
 		for range signalChannel {
 			output.Stdout.Println()
-			output.Error.Println("interrupt signal received")
+			output.Stdout.Println("interrupt signal received")
 			os.Exit(internal.InterruptSignalExitCode)
 		}
 	}()
