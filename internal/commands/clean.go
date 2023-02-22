@@ -20,7 +20,6 @@ func Clean(ctx *cli.Context) error {
 
 	// options
 	confirmation := ctx.Bool("yes")
-	verbose := ctx.Bool("verbose")
 
 	nodes, err := os.ReadDir(".")
 	if err != nil {
@@ -34,27 +33,12 @@ func Clean(ctx *cli.Context) error {
 		name := node.Name()
 
 		if util.ItemIsInArray(ignoredByDefault, name) { // if node is ignored by default
-			if verbose {
-				output.Verbose.Printf(
-					"ignoring '%v' because it is ignored by default", name,
-				)
-			}
 			continue
 		}
 		if cfg.Pinned.Exists(name) { // if node is pinned
-			if verbose {
-				output.Verbose.Printf(
-					"ignoring '%v' because it is pinned", name,
-				)
-			}
 			continue
 		}
 		if cfg.Bindings.DestinationWithPrefixExists(name) { // if node is binding destination
-			if verbose {
-				output.Verbose.Printf(
-					"ignoring '%v' because it is binding destination", name,
-				)
-			}
 			continue
 		}
 		deletions = append(deletions, name)

@@ -22,21 +22,15 @@ func NewApp() *cli.App {
 	return &cli.App{
 		Name:        "dcfg",
 		Usage:       "distribute config",
-		UsageText:   "dcfg [--help] [--version] [--verbose] [--config PATH] <command> [command options]",
+		UsageText:   "dcfg [--help] [--version] [--config PATH] <command> [command options]",
 		Version:     version,
 		Description: "Minimalist tool for copying, storing and distributing your system-wide and user config files.",
 		Flags: []cli.Flag{
-			&cli.StringFlag{ // todo: test with cli.PathFlag
+			&cli.StringFlag{
 				Name:    "config",
 				Usage:   "dcfg config file `PATH`",
 				Value:   defaultConfigFilename,
 				Aliases: []string{"c"},
-			},
-			&cli.BoolFlag{
-				Name:    "verbose",
-				Usage:   "enable verbose output",
-				Value:   false,
-				Aliases: []string{"V"},
 			},
 		},
 		Commands: []*cli.Command{
@@ -84,7 +78,7 @@ func NewApp() *cli.App {
 				Name:        "add",
 				Aliases:     []string{"a"},
 				Usage:       "add target(s)",
-				UsageText:   "dcfg [--verbose] [--config] add <TARGET 1> ...",
+				UsageText:   "dcfg [--verbose] [--config] add <TARGET1> ...",
 				Description: "adds new target(s)",
 				Action:      moreThanArgsCountMiddleware(1, commands.Add),
 				Flags: []cli.Flag{
@@ -103,7 +97,7 @@ func NewApp() *cli.App {
 				Aliases:     []string{"p"},
 				Usage:       "pin or unpin object",
 				UsageText:   "dcfg [--config] pin [--remove] <PATH1> ...",
-				Description: "pins or unpins file or directory inside context directory",
+				Description: "pins or unpins file or directory",
 				Action:      moreThanArgsCountMiddleware(1, commands.Pin),
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
@@ -118,19 +112,12 @@ func NewApp() *cli.App {
 			},
 			// filesystem operations
 			{
-				Name:        "collect",
-				Aliases:     []string{"c"},
-				Usage:       "collect targets",
-				UsageText:   "dcfg [--config] collect",
-				Description: "copies all targets according to the bindings",
-				Action:      explicitArgsCountMiddleware(0, commands.Collect),
-				Flags: []cli.Flag{
-					&cli.BoolFlag{
-						Name:  "hard",
-						Value: false,
-						Usage: "copy and overwrite files without asking any permission",
-					},
-				},
+				Name:         "collect",
+				Aliases:      []string{"c"},
+				Usage:        "collect targets",
+				UsageText:    "dcfg [--config] collect",
+				Description:  "copies all targets according to the bindings",
+				Action:       explicitArgsCountMiddleware(0, commands.Collect),
 				OnUsageError: handleUsageError,
 				Category:     filesystemOperationsCategory,
 			},
@@ -155,8 +142,9 @@ func NewApp() *cli.App {
 					&cli.StringSliceFlag{
 						Name:    "overwrite-source-prefix",
 						Aliases: []string{"o"},
-						Usage:   "overwrite source prefix",
+						Usage:   "overwrites target source prefix this time",
 					},
+					// hidden flags:
 					&cli.StringFlag{
 						Name:   "diff-bin-path",
 						Hidden: true,
@@ -170,13 +158,13 @@ func NewApp() *cli.App {
 				Name:        "remove",
 				Aliases:     []string{"rm"},
 				Usage:       "remove target",
-				UsageText:   "dcfg [--config] remove <TARGET 1> ...",
+				UsageText:   "dcfg [--config] remove <TARGET1> ...",
 				Description: "removes target",
 				Action:      moreThanArgsCountMiddleware(1, commands.Remove),
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:    "soft",
-						Usage:   "do not remove collected targets",
+						Usage:   "do not remove stored (collected) targets",
 						Value:   false,
 						Aliases: []string{"s"},
 					},
@@ -188,13 +176,13 @@ func NewApp() *cli.App {
 				Name:        "clean",
 				Aliases:     []string{"cl"},
 				Usage:       "remove all outdated collected targets and other trash",
-				UsageText:   "dcfg [--verbose] [--config] clean",
-				Description: "removes everything except up-to-date collected targets, pinned nodes, '.git' directory and dcfg config file",
+				UsageText:   "dcfg [--config] clean",
+				Description: "removes everything except up-to-date collected targets, pinned nodes and some useful files",
 				Action:      commands.Clean,
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:    "yes",
-						Usage:   "confirm cleaning",
+						Usage:   "disable confirmation prompt (dangerous)",
 						Value:   false,
 						Aliases: []string{"y"},
 					},
