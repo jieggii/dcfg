@@ -35,7 +35,7 @@ func (a *Targets) UnmarshalJSON(data []byte) error {
 
 func (a *Targets) Append(path string) error {
 	if a.Exists(path) {
-		return fmt.Errorf("path '%v' is already registered as addition", path)
+		return fmt.Errorf("path '%v' is already registered as target", path)
 	}
 	a.Paths = append(a.Paths, path)
 
@@ -50,7 +50,7 @@ func (a *Targets) Append(path string) error {
 func (a *Targets) Remove(path string) error {
 	i := util.ItemIndex(a.Paths, path)
 	if i == -1 {
-		return fmt.Errorf("'%v' is not registered as addition", path)
+		return fmt.Errorf("'%v' is not registered as target", path)
 	}
 	a.Paths = util.RemoveItem(a.Paths, i)
 	return nil
