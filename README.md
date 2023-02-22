@@ -109,8 +109,7 @@ global config files from `/etc` directory:
 $ dcfg bind /etc ./etc
 ```
 
-I also would like to point out, that you can add `--remove` flag to remove binding
-E.g.
+I also would like to point out, that you can add `--remove` flag to remove binding. For example:
 ```shell
 $ dcfg bind /usr/etc/ ./usr-etc
 $ dcfg bind --remove /usr/etc/
@@ -124,7 +123,7 @@ $ dcfg add ~/.xinitrc ~/.config/i3
 $ dcfg add /etc/issue
 ```
 
-Addition can be removed using `dcfg remove` command:
+Target can be removed using `dcfg remove` command:
 ```shell
 $ dcfg remove ~/.xinitrc
 ```
