@@ -48,10 +48,10 @@ $ dcfg --version  # check dcfg version
 
 ### C. Using go (not yet)
 ```shell
-go install github.com/jieggii/dcfg
+go install github.com/jieggii/dcfg@latest
 $ dcfg --version  # check dcfg version
 ```
-> dcfg binary will be installed to `$GOBIN`. Ensure that `$GOBIN` is in your `$PATH`.
+> dcfg binary will be installed to `$GOPATH/bin`. Ensure that `$GOPATH/bin` is in your `$PATH`.
 
 ## Simple use case
 First: why you will ever want to store your config files in one place if they are already
