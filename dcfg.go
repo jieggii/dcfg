@@ -1,4 +1,4 @@
-package main
+package dcfg
 
 import (
 	"github.com/jieggii/dcfg/internal"
