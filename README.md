@@ -10,8 +10,6 @@ Long story short - dcfg copies config files from different places to the directo
 chosen. The program has its own config file in this directory and provides you some entities 
 to do it in a more convenient way.
 
-Comfy documentation and detailed explanation can be found [here](https://jieggii.github.io/dcfg).
-
 ## Installation
 At first install **diff** and **go** packages, they are the only dcfg dependencies.
 **diff** is needed to show differences between files while using `dcfg extract` command
