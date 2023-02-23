@@ -9,13 +9,13 @@
 Long story short: **dcfg** copies config files from different places 
 to the directory you've chosen (most likely it would be a git repo). 
 The program has its own config file in this directory and provides you some abstractions
-(targets, bindings and pins) to do it in a more convenient way. 
-You also have ability to comfortably "extract" all copied config files to their original locations.
+(_targets_, _bindings_ and _pins_) to do it in a more convenient way. 
+You also have ability to comfortably extract all copied config files to their original locations.
 
 ## Installation
 At first install **diff** and **go** packages, they are the only dcfg dependencies.
 **diff** is needed to show differences between files while using `dcfg extract` command
-and **go** is used to compile dcfg itself. It is most likely, that they are already
+and **go** is used to compile dcfg itself. It is most probably, that they are already
 installed on your system but be aware!
 
 **On Debian-based distributions:**
@@ -55,7 +55,7 @@ $ dcfg --version  # check dcfg version
 
 ## Simple use case
 First: why you will ever want to store your config files in one place if they are already
-stored on your computer? If you ask this question, most probably that you really don't need it.
+stored on your computer? If you ask this question, most likely that you really don't need it.
 But I will answer anyway just in case. I see two main reasons here:
 1. To share your funky so-called **dotfiles** with the outer world and your nerdy internet friends
 2. To back up your necessary configuration files, so they don't get lost if you blow your machine
