@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+// Init command creates dcfg config file.
 func Init(ctx *cli.Context) error {
 	cfgPath := ctx.String("config")
 	cfgExists, err := fs.NodeExists(cfgPath)

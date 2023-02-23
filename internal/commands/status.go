@@ -7,6 +7,7 @@ import (
 	"strconv"
 )
 
+// Status command outputs some useful information about current state.
 func Status(ctx *cli.Context) error {
 	cfgPath := ctx.String("config")
 	cfg, err := config.NewConfigFromFile(cfgPath)

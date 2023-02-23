@@ -9,8 +9,10 @@ import (
 	"os"
 )
 
+// Files and directories which will be not deleted anyway
 var ignoredByDefault = []string{".git", ".gitignore"}
 
+// Clean command removes trash.
 func Clean(ctx *cli.Context) error {
 	cfgPath := ctx.String("config")
 	cfg, err := config.NewConfigFromFile(cfgPath)

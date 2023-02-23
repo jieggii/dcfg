@@ -7,14 +7,14 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// dcfg metadata
+// dcfg version
 const version = "0.2.0"
 
 // defaults
 const defaultConfigFilename = "dcfg.json"
 const defaultDiffBinPath = "/usr/bin/diff"
 
-// categories
+// categories of commands
 const serviceCategory = "SERVICE"
 const metadataManagementCategory = "METADATA MANAGEMENT"
 const filesystemOperationsCategory = "FILESYSTEM OPERATIONS"

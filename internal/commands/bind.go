@@ -8,6 +8,7 @@ import (
 	"path"
 )
 
+// Bind command adds new binding.
 func Bind(ctx *cli.Context) error {
 	cfgPath := ctx.String("config")
 	cfg, err := config.NewConfigFromFile(cfgPath)

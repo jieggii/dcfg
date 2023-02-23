@@ -10,6 +10,7 @@ import (
 	"path"
 )
 
+// Add command adds new target.
 func Add(ctx *cli.Context) error {
 	cfgPath := ctx.String("config")
 	cfg, err := config.NewConfigFromFile(cfgPath)

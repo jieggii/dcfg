@@ -12,6 +12,7 @@ import (
 	"strings"
 )
 
+// Extract command extracts all collected targets to their sources.
 func Extract(ctx *cli.Context) error {
 	cfgPath := ctx.String("config")
 	cfg, err := config.NewConfigFromFile(cfgPath)

@@ -5,6 +5,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+// intervalArgsCountMiddleware ensures that count of arguments passed to the command
+// is in the provided interval [minArgsCount, maxArgsCount].
 func intervalArgsCountMiddleware(minArgsCount int, maxArgsCount int, action cli.ActionFunc) cli.ActionFunc {
 	return func(ctx *cli.Context) error {
 		args := ctx.Args()

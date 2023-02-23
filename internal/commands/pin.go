@@ -8,6 +8,7 @@ import (
 	"path"
 )
 
+// Pin command pins file or directory.
 func Pin(ctx *cli.Context) error {
 	cfgPath := ctx.String("config")
 	cfg, err := config.NewConfigFromFile(cfgPath)

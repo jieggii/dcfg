@@ -8,6 +8,7 @@ import (
 	"strconv"
 )
 
+// Collect command collects all targets.
 func Collect(ctx *cli.Context) error {
 	cfgPath := ctx.String("config")
 

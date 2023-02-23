@@ -10,6 +10,7 @@ import (
 	"path"
 )
 
+// Remove command removes target.
 func Remove(ctx *cli.Context) error {
 	cfgPath := ctx.String("config")
 	cfg, err := config.NewConfigFromFile(cfgPath)
