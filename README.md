@@ -28,7 +28,7 @@ $ sudo apt install diff go
 $ sudo pacman -S diff go
 ```
 After installing dependencies you can proceed to installation of dcfg.
-There are some interchangeable options to install it:
+There are two interchangeable options to install it:
 ### A. From sources
 ```shell
 $ git clone https://github.com/jieggii/dcfg
@@ -39,14 +39,7 @@ $ dcfg --version  # check dcfg version
 ```
 > dcfg binary will be installed to `/usr/bin/dcfg`.
 
-### B. From AUR (not yet)
-```shell
-$ yay -S dcfg
-$ dcfg --version  # check dcfg version
-```
-> dcfg binary will be installed to `/usr/bin/dcfg`.
-
-### C. Using go (not yet)
+### B. Using go
 ```shell
 $ go install github.com/jieggii/dcfg@latest
 $ dcfg --version  # check dcfg version
@@ -180,3 +173,6 @@ The command will look like this:
 $ dcfg extract --overwrite-source-prefix /home/bob:/home/alice
 ```
 And now Bob's dotfiles will be put into Alice's home directory!
+
+## Example dotfile git repositories using dcfg
+* [jieggii/dotfiles](https://github.com/jieggii/dotfiles)
