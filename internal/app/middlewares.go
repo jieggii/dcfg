@@ -20,19 +20,21 @@ func intervalArgsCountMiddleware(minArgsCount int, maxArgsCount int, action cli.
 	}
 }
 
-func moreThanArgsCountMiddleware(minimalArgsCount int, action cli.ActionFunc) cli.ActionFunc {
+// atLeastOneArgumentMiddleware ensures that at least one argument was passed to command.
+func atLeastOneArgumentMiddleware(action cli.ActionFunc) cli.ActionFunc {
 	return func(ctx *cli.Context) error {
 		argsCount := ctx.Args().Len()
-		if argsCount < minimalArgsCount {
+		if argsCount < 1 {
 			return fmt.Errorf(
-				"%v command takes %v and more arguments, got %v\nusage: %v",
-				ctx.Command.Name, minimalArgsCount, argsCount, ctx.Command.UsageText,
+				"%v command takes at least 1 argument, got %v\nusage: %v",
+				ctx.Command.Name, argsCount, ctx.Command.UsageText,
 			)
 		}
 		return action(ctx)
 	}
 }
 
+// noArgsMiddleware ensures that no arguments were passed to command.
 func noArgsMiddleware(action cli.ActionFunc) cli.ActionFunc {
 	return func(ctx *cli.Context) error {
 		argsCount := ctx.Args().Len()

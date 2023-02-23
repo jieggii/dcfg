@@ -81,7 +81,7 @@ func NewApp() *cli.App {
 				Usage:       "add target(s)",
 				UsageText:   "dcfg [--config] add <TARGET1> ...",
 				Description: "adds new target(s)",
-				Action:      moreThanArgsCountMiddleware(1, commands.Add),
+				Action:      atLeastOneArgumentMiddleware(commands.Add),
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:    "collect",
@@ -99,7 +99,7 @@ func NewApp() *cli.App {
 				Usage:       "pin or unpin object",
 				UsageText:   "dcfg [--config] pin [--remove] <PATH1> ...",
 				Description: "pins or unpins file or directory",
-				Action:      moreThanArgsCountMiddleware(1, commands.Pin),
+				Action:      atLeastOneArgumentMiddleware(commands.Pin),
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:    "remove",
@@ -161,7 +161,7 @@ func NewApp() *cli.App {
 				Usage:       "remove target",
 				UsageText:   "dcfg [--config] remove <TARGET1> ...",
 				Description: "removes target",
-				Action:      moreThanArgsCountMiddleware(1, commands.Remove),
+				Action:      atLeastOneArgumentMiddleware(commands.Remove),
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:    "soft",
