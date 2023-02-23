@@ -8,8 +8,10 @@ import (
 )
 
 func handleUsageError(ctx *cli.Context, err error, _ bool) error {
-	output.Stdout.Printf("usage: %v\n", ctx.Command.UsageText)
-	return err
+	output.Error.Println(err)
+	output.Stdout.Printf("usage: %v", ctx.Command.UsageText)
+	os.Exit(internal.GenericErrorExitCode)
+	return nil
 }
 
 func handleCommandNotFoundError(_ *cli.Context, command string) {
