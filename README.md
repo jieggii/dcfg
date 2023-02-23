@@ -41,7 +41,7 @@ $ dcfg --version  # check dcfg version
 
 ### B. Using go
 ```shell
-$ go install github.com/jieggii/dcfg@latest
+$ go install github.com/jieggii/dcfg
 $ dcfg --version  # check dcfg version
 ```
 > dcfg binary will be installed to `$GOPATH/bin`. Ensure that `$GOPATH/bin` is in your `$PATH`.
