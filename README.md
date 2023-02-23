@@ -127,7 +127,7 @@ Now it's time to finally collect all defined targets! Just type:
 $ dcfg collect
 ```
 
-Then, if you run `tree -a -I .git` command to see contents of the current directory,
+Then, if you run `tree -a -I .git` command to see contents of the current working directory,
 you will see the similar picture: 
 ```
 .
