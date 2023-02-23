@@ -6,9 +6,11 @@
 </p>
 
 ## Conception
-Long story short - dcfg copies config files from different places to the directory you've 
-chosen. The program has its own config file in this directory and provides you some entities 
-to do it in a more convenient way.
+Long story short: **dcfg** copies config files from different places 
+to the directory you've chosen (most likely it would be a git repo). 
+The program has its own config file in this directory and provides you some abstractions
+(targets, bindings and pins) to do it in a more convenient way. 
+You also have ability to comfortably "extract" all copied config files to their original locations.
 
 ## Installation
 At first install **diff** and **go** packages, they are the only dcfg dependencies.
