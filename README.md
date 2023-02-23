@@ -65,8 +65,8 @@ It is most likely that this directory will also be a git repository.
 
 ```shell
 $ mkdir ~/dotfiles  # create `dotfiles` directory in $HOME
-$ cd ~/dotfiles  # go into it
-$ git init  # initialize git repository
+$ cd ~/dotfiles     # cd into it
+$ git init          # initialize git repository
 ```
 And then run
 ```shell
