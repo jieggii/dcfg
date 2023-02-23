@@ -88,6 +88,7 @@ func Extract(ctx *cli.Context) error {
 					newTarget, target,
 				)
 				target = newTarget
+				break
 			}
 		}
 

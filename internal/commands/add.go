@@ -27,8 +27,11 @@ func Add(ctx *cli.Context) error {
 	destinations := map[string]string{}
 
 	// validating:
-	for _, target := range targets {
+	for i, target := range targets {
 		target = path.Clean(target)
+		targets[i] = target // overwrite target with cleaned target
+		// not to clean target second time later
+
 		if !path.IsAbs(target) {
 			return fmt.Errorf(
 				"path to target must be absolute (got relative path '%v')",
@@ -54,7 +57,7 @@ func Add(ctx *cli.Context) error {
 
 	// performing actions:
 	for _, target := range targets {
-		target = path.Clean(target)
+		// note: target is already cleaned
 		destination := destinations[target]
 
 		if err := cfg.Targets.Append(target); err != nil {
