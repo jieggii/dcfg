@@ -7,6 +7,8 @@ import (
 	"github.com/jieggii/dcfg/internal/util"
 )
 
+// Targets represents array of targets.
+// Target is a file or directory to be collected using dcfg.
 type Targets struct {
 	Paths []string // absolute paths to targets
 
@@ -33,9 +35,10 @@ func (a *Targets) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// Append appends `path` to array of targets.
 func (a *Targets) Append(path string) error {
 	if a.Exists(path) {
-		return fmt.Errorf("path '%v' is already registered as target", path)
+		return fmt.Errorf("'%v' is already registered as target", path)
 	}
 	a.Paths = append(a.Paths, path)
 
@@ -47,6 +50,7 @@ func (a *Targets) Append(path string) error {
 	return nil
 }
 
+// Remove removes `path` from array of targets.
 func (a *Targets) Remove(path string) error {
 	i := util.ItemIndex(a.Paths, path)
 	if i == -1 {
@@ -56,14 +60,17 @@ func (a *Targets) Remove(path string) error {
 	return nil
 }
 
+// Exists returns true if `path` is present in array of targets.
 func (a *Targets) Exists(path string) bool {
 	return util.ItemIsInArray(a.Paths, path)
 }
 
+// Any returns true if there is at least one target in arraay of targets.
 func (a *Targets) Any() bool {
 	return len(a.Paths) != 0
 }
 
+// IsCollected returns true if `destination` exists.
 func (a *Targets) IsCollected(destination string) (bool, error) {
 	collected, err := fs.NodeExists(destination)
 	if err != nil {

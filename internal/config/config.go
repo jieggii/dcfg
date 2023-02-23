@@ -11,26 +11,29 @@ import (
 
 const configFilePermission = 0644
 
+// Config holds all essential data needed for dcfg.
 type Config struct {
 	Bindings Bindings `json:"bindings"` // path-to-path bindings
 	Targets  Targets  `json:"targets"`  // paths to destinations of targets
 	Pinned   Pinned   `json:"pins"`     // paths to pinned objects
 }
 
-func (c *Config) ResolveTargetDestination(target string) (string, bool) {
+// ResolveTargetDestination returns target destination according to bindings.
+func (c *Config) ResolveTargetDestination(targetSource string) (string, bool) {
 	for _, bindingSource := range c.Bindings.Sources {
-		if strings.HasPrefix(target, bindingSource) {
+		if strings.HasPrefix(targetSource, bindingSource) {
 			bindingDestination, err := c.Bindings.ResolveDestination(bindingSource)
 			if err != nil {
 				panic(err)
 			}
-			destination := strings.Replace(target, bindingSource, bindingDestination, 1)
+			destination := strings.Replace(targetSource, bindingSource, bindingDestination, 1)
 			return destination, true
 		}
 	}
 	return "", false
 }
 
+// ResolveTargetSource returns target source according to bindings.
 func (c *Config) ResolveTargetSource(targetDestination string) (string, bool) {
 	for _, target := range c.Targets.Paths {
 		destination, resolved := c.ResolveTargetDestination(target)
@@ -43,6 +46,7 @@ func (c *Config) ResolveTargetSource(targetDestination string) (string, bool) {
 	return "", false
 }
 
+// DumpToFile marshals config into JSON format and dumps it to file with path `path`.
 func (c *Config) DumpToFile(path string) error {
 	data, err := json.MarshalIndent(c, "", "    ")
 	if err != nil {
@@ -55,6 +59,7 @@ func (c *Config) DumpToFile(path string) error {
 	return nil
 }
 
+// NewConfig creates default empty Config instance.
 func NewConfig() *Config {
 	return &Config{
 		Bindings: Bindings{},
@@ -63,6 +68,8 @@ func NewConfig() *Config {
 	}
 }
 
+// NewConfigFromFile reads JSON data from file with path `path`
+// and creates Config instance from it.
 func NewConfigFromFile(path string) (*Config, error) {
 	exists, err := fs.NodeExists(path)
 	if err != nil {

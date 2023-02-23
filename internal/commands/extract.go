@@ -62,14 +62,6 @@ func Extract(ctx *cli.Context) error {
 		sourcePrefixReplaceMap[oldPrefix] = newPrefix
 	}
 
-	// print sourcePrefixReplaceMap
-	//output.Stdout.Println(
-	//	"overwritten target destinations:",
-	//)
-	//for oldPrefix, newPrefix := range sourcePrefixReplaceMap {
-	//	output.Stdout.Printf("%v -> %)
-	//}
-
 	targetsCount := len(cfg.Targets.Paths)
 	if targetsCount == 0 {
 		return fmt.Errorf("there are no targets")

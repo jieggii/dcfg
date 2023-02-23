@@ -44,10 +44,11 @@ func Remove(ctx *cli.Context) error {
 			destination = anyPath
 		}
 		if err := cfg.Targets.Remove(source); err != nil {
-			output.Error.Printf(
-				"could not remove '%v' from targets list",
-				source,
-			)
+			output.Error.Println(err)
+			//output.Error.Printf(
+			//	"could not remove '%v' from targets list (%v)",
+			//	source, err,
+			//)
 			continue
 		}
 		output.Minus.Printf("removed '%v' from targets list", source)

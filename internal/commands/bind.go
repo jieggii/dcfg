@@ -15,7 +15,7 @@ func Bind(ctx *cli.Context) error {
 		return err
 	}
 
-	// flags
+	// options
 	remove := ctx.Bool("remove")
 
 	args := ctx.Args()

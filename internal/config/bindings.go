@@ -9,11 +9,20 @@ import (
 
 const bindingWithSourceDoesNotExistErrorText = "binding with source '%v' does not exist"
 
+// Bindings represents bindings (yes).
+//
+// Binding is like mount point or alias, they map source path
+// to destination path.
+//
+// For example, binding `/home/user -> ./user-home` means that all targets
+// from `/home/user` will be copied to `./user-home`
 type Bindings struct {
+	// Using two arrays instead of map[string]string because maps in Go
+	// don't store keys order (see https://go.dev/blog/maps#iteration-order).
 	Sources      []string // list of absolute paths to sources
-	Destinations []string // list of relative to Config.Context paths to destinations
+	Destinations []string // list of relative paths to destinations
 
-	LongestSourceLen int
+	LongestSourceLen int // length of the longest source path, needed for pretty-printing
 }
 
 func (b Bindings) MarshalJSON() ([]byte, error) {
@@ -22,6 +31,7 @@ func (b Bindings) MarshalJSON() ([]byte, error) {
 	if len(b.Sources) != len(b.Destinations) {
 		panic("count of sources does not match count of destinations")
 	}
+
 	for i := range b.Sources {
 		batch := make(map[string]string)
 		batch[b.Sources[i]] = b.Destinations[i]
@@ -32,10 +42,7 @@ func (b Bindings) MarshalJSON() ([]byte, error) {
 }
 
 func (b *Bindings) UnmarshalJSON(data []byte) error {
-	// don't use simple map[string]string in this case because map
-	// doesn't store keys order (see https://go.dev/blog/maps#iteration-order)
 	var bindingBatches []map[string]string
-
 	if err := json.Unmarshal(data, &bindingBatches); err != nil {
 		return err
 	}
@@ -50,9 +57,10 @@ func (b *Bindings) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// Append registers new binding.
 func (b *Bindings) Append(source string, destination string) error {
 	if b.SourceExists(source) {
-		return fmt.Errorf("path '%v' is already registered as binding source", source)
+		return fmt.Errorf("'%v' is already registered as binding source", source)
 	}
 	b.Sources = append(b.Sources, source)
 
@@ -61,12 +69,13 @@ func (b *Bindings) Append(source string, destination string) error {
 		b.LongestSourceLen = sourceLength
 	}
 
-	// not checking if destination exists 'cause same destination may be used with multiple sources
+	// not checking if destination exists because same destination may be used with multiple sources
 	b.Destinations = append(b.Destinations, destination)
 
 	return nil
 }
 
+// Remove removes binding with source `source`.
 func (b *Bindings) Remove(source string) error {
 	i := util.ItemIndex(b.Sources, source)
 	if i == -1 {
@@ -77,6 +86,7 @@ func (b *Bindings) Remove(source string) error {
 	return nil
 }
 
+// ResolveDestination returns destination of binding with source `source`.
 func (b *Bindings) ResolveDestination(source string) (string, error) {
 	for i := range b.Sources {
 		if b.Sources[i] == source {
@@ -86,14 +96,18 @@ func (b *Bindings) ResolveDestination(source string) (string, error) {
 	return "", fmt.Errorf(bindingWithSourceDoesNotExistErrorText, source)
 }
 
+// SourceExists returns true if `path` is registered as a binging source.
 func (b *Bindings) SourceExists(path string) bool {
 	return util.ItemIsInArray(b.Sources, path)
 }
 
+// DestinationExists returns true if `path` is registered as a binging destination.
 func (b *Bindings) DestinationExists(path string) bool {
 	return util.ItemIsInArray(b.Destinations, path)
 }
 
+// DestinationWithPrefixExists returns true if path with prefix `prefix` is registered
+// as a binding destination.
 func (b *Bindings) DestinationWithPrefixExists(prefix string) bool {
 	for _, destination := range b.Destinations {
 		if strings.HasPrefix(destination, prefix) {
@@ -103,6 +117,7 @@ func (b *Bindings) DestinationWithPrefixExists(prefix string) bool {
 	return false
 }
 
+// Any returns true if there is at least one binding registered.
 func (b *Bindings) Any() bool {
 	return len(b.Sources) != 0
 }

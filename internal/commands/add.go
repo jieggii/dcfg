@@ -57,9 +57,7 @@ func Add(ctx *cli.Context) error {
 		destination := destinations[target]
 
 		if err := cfg.Targets.Append(target); err != nil {
-			output.Error.Println(
-				"could not append '%v' to targets (%v)", target, err,
-			)
+			output.Error.Println(err)
 			continue
 		}
 		output.Plus.Printf("appended new target '%v'", target)
