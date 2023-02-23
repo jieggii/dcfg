@@ -1,9 +1,10 @@
 package app
 
 import (
+	"os"
+
 	"github.com/jieggii/dcfg/internal/commands"
 	"github.com/urfave/cli/v2"
-	"os"
 )
 
 // dcfg metadata
@@ -78,7 +79,7 @@ func NewApp() *cli.App {
 				Name:        "add",
 				Aliases:     []string{"a"},
 				Usage:       "add target(s)",
-				UsageText:   "dcfg [--verbose] [--config] add <TARGET1> ...",
+				UsageText:   "dcfg [--config] add <TARGET1> ...",
 				Description: "adds new target(s)",
 				Action:      moreThanArgsCountMiddleware(1, commands.Add),
 				Flags: []cli.Flag{
