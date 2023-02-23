@@ -20,36 +20,37 @@ func Remove(ctx *cli.Context) error {
 	// flags
 	soft := ctx.Bool("soft")
 
-	targets := ctx.Args().Slice()
-	for _, target := range targets {
+	paths := ctx.Args().Slice()
+
+	for _, anyPath := range paths {
 		var source string      // path to source of target
 		var destination string // path to destination of collected target
 
-		target = path.Clean(target)
+		anyPath = path.Clean(anyPath)
 
-		if path.IsAbs(target) { // target source is provided
-			source = target
-			destination, _ = cfg.ResolveTargetDestination(target)
+		if path.IsAbs(anyPath) { // target source is provided
+			source = anyPath
+			destination, _ = cfg.ResolveTargetDestination(anyPath)
 			// don't check if target destination path is resolved because
 			// suitable binding can be already deleted and resolving will
 			// fail because of that
 		} else { // path to target destination is provided
 			var resolved bool
-			source, resolved = cfg.ResolveTargetSource(target)
+			source, resolved = cfg.ResolveTargetSource(anyPath)
 			if !resolved {
-				return fmt.Errorf("could not resolve source of '%v'", target)
+				return fmt.Errorf("could not resolve source of '%v'", anyPath)
 			}
 
-			destination = target
+			destination = anyPath
 		}
-		if err := cfg.Targets.Remove(target); err != nil {
+		if err := cfg.Targets.Remove(source); err != nil {
 			output.Error.Printf(
 				"could not remove '%v' from targets list",
 				source,
 			)
 			continue
 		}
-		output.Minus.Printf("removed '%v' from targets list", target)
+		output.Minus.Printf("removed '%v' from targets list", source)
 
 		targetDestinationExists, err := fs.NodeExists(destination)
 		if err != nil {
