@@ -45,7 +45,7 @@ func Remove(ctx *cli.Context) error {
 			destination = anyPath
 		}
 		if err := cfg.Targets.Remove(source); err != nil {
-			output.Error.Println(err)
+			output.Warning.Println(err)
 			continue
 		}
 		output.Minus.Printf("removed '%v' from targets list", source)
@@ -60,7 +60,7 @@ func Remove(ctx *cli.Context) error {
 		if !soft && targetDestinationExists {
 			err := os.RemoveAll(destination)
 			if err != nil {
-				output.Error.Printf(
+				output.Warning.Printf(
 					"could not remove '%v' (%v)", destination, err,
 				)
 				continue

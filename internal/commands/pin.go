@@ -29,14 +29,14 @@ func Pin(ctx *cli.Context) error {
 
 		if !remove { // if --remove flag is not used
 			if err = cfg.Pinned.Append(pin); err != nil {
-				output.Error.Println("could not pin '%v' (%v)", pin, err)
+				output.Warning.Println("could not pin '%v' (%v)", pin, err)
 				continue
 			}
 			output.Plus.Printf("pinned '%v'", pin)
 
 		} else { // if --remove flag is used
 			if err := cfg.Pinned.Remove(pin); err != nil {
-				output.Error.Println("could not unpin '%v' (%v)", pin, err)
+				output.Warning.Println("could not unpin '%v' (%v)", pin, err)
 				continue
 			}
 			output.Minus.Printf("unpinned '%v'", pin)

@@ -61,14 +61,14 @@ func Add(ctx *cli.Context) error {
 		destination := destinations[target]
 
 		if err := cfg.Targets.Append(target); err != nil {
-			output.Error.Println(err)
+			output.Warning.Println(err)
 			continue
 		}
 		output.Plus.Printf("appended new target '%v'", target)
 
 		if collect {
 			if err := fs.Copy(target, destination); err != nil {
-				output.Error.Printf(
+				output.Warning.Printf(
 					"could not copy '%v' to '%v' (%v)",
 					target, destination, err,
 				)

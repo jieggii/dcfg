@@ -125,7 +125,7 @@ func Extract(ctx *cli.Context) error {
 			output.Stdout.Println(outputDivider)
 
 			if err != nil {
-				output.Error.Printf("error running diff (%v)", err)
+				output.Warning.Printf("error running diff (%v)", err)
 			}
 		}
 		if !hard { // if --hard flag is not used
