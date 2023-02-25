@@ -1,3 +1,5 @@
+BIN_DEST := /usr/bin/dcfg
+
 .PHONY: all
 all: build
 
@@ -8,4 +10,8 @@ build:
 
 .PHONY: install
 install:
-	install -m 755 ./dist/dcfg /usr/bin/dcfg
+	install -m 755 ./dist/dcfg $(BIN_DEST)
+
+.PHONY: uninstall
+uninstall:
+	rm -f $(BIN_DEST)
