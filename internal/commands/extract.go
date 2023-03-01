@@ -21,12 +21,12 @@ func Extract(ctx *cli.Context) error {
 	}
 
 	// options
-	nodiff := ctx.Bool("nodiff")
+	nodiff := ctx.Bool("no-diff")
 	hard := ctx.Bool("hard")
 	sourcePrefixReplacements := ctx.StringSlice("overwrite-source-prefix")
 
 	// hidden options
-	diffBinPath := ctx.String("diff-bin-path")
+	diffBinPath := ctx.String("diff-bin")
 
 	sourcePrefixReplaceMap := make(map[string]string)
 

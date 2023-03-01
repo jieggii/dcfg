@@ -12,7 +12,7 @@ const version = "0.2.0"
 
 // defaults
 const defaultConfigFilename = "dcfg.json"
-const defaultDiffBinPath = "/usr/bin/diff"
+const defaultDiffBin = "/usr/bin/diff"
 
 // categories of commands
 const serviceCategory = "SERVICE"
@@ -147,9 +147,9 @@ func NewApp() *cli.App {
 					},
 					// hidden flags:
 					&cli.StringFlag{
-						Name:   "diff-bin-path",
+						Name:   "diff-bin",
 						Hidden: true,
-						Value:  defaultDiffBinPath,
+						Value:  defaultDiffBin,
 					},
 				},
 				OnUsageError: handleUsageError,
