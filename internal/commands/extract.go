@@ -112,10 +112,23 @@ func Extract(ctx *cli.Context) error {
 		output.Stdout.Printf(outputString)
 
 		if !nodiff { // if --no-diff flag is not used
+
 			outputStringLen := len(outputString)
 			outputDivider := strings.Repeat("-", outputStringLen)
 
 			output.Stdout.Println(strings.Repeat(" ", int(outputStringLen/2)-4), "diff(s):")
+
+			targetExists, err := fs.NodeExists(target)
+			if err != nil {
+				output.Warning.Printf("could not check if %v exists (%v)", target, err)
+				targetExists = true
+			}
+			if !targetExists {
+				output.Warning.Printf("%v does not exist", target)
+				target = "/dev/null" // diff will compare node being extracted
+				// to /dev/null in case if target does not exist
+			}
+
 			output.Stdout.Println(outputDivider)
 
 			diffOutput, err := diff.GetDiff(diffBinPath, target, destination)
